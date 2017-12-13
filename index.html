@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+<!--     <link rel="stylesheet" type="text/css" href="main.css">
+ -->
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+    <script src="./node_modules/bignumber.js/bignumber.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+
+        <h1>Test1</h1>
+
+        <h2 id="instructor"></h2>
+
+        <label for="name" class="col-lg-2 control-label">Test2</label>
+        <input id="name" type="text">
+
+        <label for="name" class="col-lg-2 control-label">Test3</label>
+        <input id="age" type="text">
+
+        <button id="button">Submit</button>
+
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+       // Our future code here..
+      if (typeof web3 !== 'undefined') {
+        web3 = new Web3(web3.currentProvider);
+      } else {
+        // set the provider you want from Web3.providers
+        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+      }
+
+      web3.eth.defaultAccount = web3.eth.accounts[0];
+      console.log(web3.eth.accounts[0]);
+
+      var BusinessContract = web3.eth.contract([{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"receipts","outputs":[{"name":"cashierId","type":"uint256"},{"name":"totalPaid","type":"uint256"},{"name":"buyerInfo","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_id","type":"uint256"},{"name":"_name","type":"bytes32"},{"name":"_price","type":"uint256"}],"name":"addItem","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"invoiceId","type":"uint256"}],"name":"getInvoice","outputs":[{"name":"nameArray","type":"bytes32[]"},{"name":"unitPriceArray","type":"uint256[]"},{"name":"quantityArray","type":"uint256[]"},{"name":"amountArray","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"invoices","outputs":[{"name":"cashierId","type":"uint256"},{"name":"subTotal","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"cashierId","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_totalPaid","type":"uint256"},{"name":"_buyerInfo","type":"string"}],"name":"newReceipt","outputs":[{"name":"receiptId","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"cashierAddr","type":"address"},{"name":"cashierName","type":"string"}],"name":"addCashier","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"items","outputs":[{"name":"name","type":"bytes32"},{"name":"price","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"cashiers","outputs":[{"name":"addr","type":"address"},{"name":"name","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"transaction","type":"uint256[]"}],"name":"newInvoice","outputs":[{"name":"invoiceId","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]);
+
+      var Business = BusinessContract.at('0x5e536c3fda6fd14ee6d9d68942d8ed0153e7d7ad');
+      console.log(Business.owner());
+      //var balance = new BigNumber('0xb7326d1484e9e7f445404e1053361d9f231e9c4a');
+      // Business.addCashier.estimateGas("0xb7326d1484e9e7f445404e1053361d9f231e9c4a",5);
+      // Business.addCashier(0x2, 'tata', { gas: 900000});
+      //Business.addCashier(balance,"tata");
+
+      //yes
+      // var egas = Business.newInvoice.estimateGas([1,2,2,5]);
+      // var invoiceId = Business.newInvoice([1,4,2,5],{gas: egas});
+      // console.log(invoiceId);
+
+      // web3.toAscii(Business.getInvoice(0)[0][0]);
+
+    </script>
+
+</body>
+</html>

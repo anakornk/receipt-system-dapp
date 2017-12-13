@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/anakornk/receipt-system-dapp/issues"
   },
-  "homepage": "https://github.com/anakornk/receipt-system-dapp#readme"
+  "homepage": "https://github.com/anakornk/receipt-system-dapp#readme",
+  "dependencies": {
+    "web3": "github:ethereum/web3.js"
+  }
 }
