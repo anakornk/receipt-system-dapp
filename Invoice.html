@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>new Invoice</title>
+
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+      <form id="transactionForm" action="#">
+        <table style="width:100%" id="transaction">
+          <tr>
+            <th>ID</th>
+            <th>Quantity</th>
+          </tr>
+          <tr>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+          </tr>
+        </table>
+        <input type="button" value="ADD" id="addBtn">
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+
+
+    <script>
+       // Our future code here..
+      if (typeof web3 !== 'undefined') {
+        web3 = new Web3(web3.currentProvider);
+      } else {
+        // set the provider you want from Web3.providers
+        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+      }
+
+      web3.eth.defaultAccount = web3.eth.accounts[0];
+      console.log(web3.eth.accounts[0]);
+
+      var BusinessContract = web3.eth.contract([{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"receipts","outputs":[{"name":"cashierId","type":"uint256"},{"name":"totalPaid","type":"uint256"},{"name":"buyerInfo","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"cashierAddr","type":"address"},{"name":"freeze","type":"bool"}],"name":"freezeCashier","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_id","type":"uint256"},{"name":"_name","type":"bytes32"},{"name":"_price","type":"uint256"}],"name":"addItem","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"invoiceId","type":"uint256"}],"name":"getInvoice","outputs":[{"name":"nameArray","type":"bytes32[]"},{"name":"unitPriceArray","type":"uint256[]"},{"name":"quantityArray","type":"uint256[]"},{"name":"amountArray","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"invoices","outputs":[{"name":"cashierId","type":"uint256"},{"name":"subTotal","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"cashierId","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_totalPaid","type":"uint256"},{"name":"_buyerInfo","type":"string"}],"name":"newReceipt","outputs":[{"name":"receiptId","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"cashierAddr","type":"address"},{"name":"cashierName","type":"string"}],"name":"addCashier","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"items","outputs":[{"name":"name","type":"bytes32"},{"name":"price","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"cashiers","outputs":[{"name":"addr","type":"address"},{"name":"name","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"frozenCashier","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"transaction","type":"uint256[]"}],"name":"newInvoice","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"text","type":"string"},{"indexed":false,"name":"invoiceId","type":"uint256"}],"name":"InvoiceEvent","type":"event"}]);
+
+      var Business = BusinessContract.at('0x92b2a418bc58966c47f597b9db2c5f4c86d75329');
+      console.log(Business.owner());
+
+
+      function newInvoice(transaction){
+        console.log(transaction);
+        var eGas = Business.newInvoice.estimateGas(transaction);
+        var transactionHash = Business.newInvoice(transaction,{gas: eGas});
+        var invoiceEvent = Business.InvoiceEvent();
+        invoiceEvent.watch(function(error,result){
+          if(!error && transactionHash == result.transactionHash){
+            console.log(result.args.invoiceId.toString());
+            invoiceEvent.stopWatching();
+          }
+        });
+      };
+
+      function getInvoice(invoiceId){
+        var [nameArray,unitPriceArray,quantityArray,amountArray] =  Business.getInvoice(invoiceId);
+        for(var i=0;i<nameArray.length;i++){
+          var transationItem = web3.toAscii(nameArray[i]) + " " + unitPriceArray[i] + " " + quantityArray[i] + " " + amountArray[i];
+          console.log(transationItem);
+        }
+      }
+
+      var addBtn = document.querySelector("#addBtn");
+      addBtn.addEventListener('click',function(){
+        var td = document.createElement('tr');
+        td.innerHTML = '<td><input type="text"></td><td><input type="text"></td>';
+        document.querySelector("#transaction").appendChild(td);
+      });
+
+      var transactionForm = document.querySelector("#transactionForm");
+      transactionForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        var inputs = document.querySelectorAll("#transaction td > input");
+        var transaction = [];
+        inputs.forEach(function(input){
+          transaction.push(input.value);
+        });
+        newInvoice(transaction);
+      })
+
+
+    </script>
+
+</body>
+</html>

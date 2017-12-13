@@ -6,16 +6,23 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
 
-<!--     <link rel="stylesheet" type="text/css" href="main.css">
- -->
-    <script src="./node_modules/web3/dist/web3.min.js"></script>
-    <script src="./node_modules/bignumber.js/bignumber.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="main.css">
 
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="container">
 
-        <h1>Test1</h1>
+<!--         <h1>Test1</h1>
 
         <h2 id="instructor"></h2>
 
@@ -25,12 +32,35 @@
         <label for="name" class="col-lg-2 control-label">Test3</label>
         <input id="age" type="text">
 
-        <button id="button">Submit</button>
+        <button id="button">Submit</button> -->
 
-
+        <form id="transactionForm" action="#">
+<!--           <div class="form-group">
+            <label for="email">Email address:</label>
+            <input type="email" class="form-control" id="email">
+          </div>
+          <div class="form-group">
+            <label for="pwd">Password:</label>
+            <input type="password" class="form-control" id="pwd">
+          </div>
+          <div class="checkbox">
+            <label><input type="checkbox"> Remember me</label>
+          </div> -->
+          <table style="width:100%" id="transaction">
+            <tr>
+              <th>ID</th>
+              <th>Quantity</th>
+            </tr>
+            <tr>
+              <td><input type="text"></td>
+              <td><input type="text"></td>
+            </tr>
+          </table>
+          <input type="button" value="ADD" id="addBtn">
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 
     <script>
        // Our future code here..
@@ -59,7 +89,37 @@
       // console.log(invoiceId);
 
       // web3.toAscii(Business.getInvoice(0)[0][0]);
+      function newInvoice(transaction){
+        console.log(transaction);
+        var eGas = Business.newInvoice.estimateGas(transaction);
+        Business.newInvoice(transaction,{gas: eGas});
+      };
 
+      function getInvoice(invoiceId){
+        var [nameArray,unitPriceArray,quantityArray,amountArray] =  Business.getInvoice(invoiceId);
+        for(var i=0;i<nameArray.length;i++){
+          var transationItem = web3.toAscii(nameArray[i]) + " " + unitPriceArray[i] + " " + quantityArray[i] + " " + amountArray[i];
+          console.log(transationItem);
+        }
+      }
+
+      var addBtn = document.querySelector("#addBtn");
+      addBtn.addEventListener('click',function(){
+        var td = document.createElement('tr');
+        td.innerHTML = '<td><input type="text"></td><td><input type="text"></td>';
+        document.querySelector("#transaction").appendChild(td);
+      });
+
+      var transactionForm = document.querySelector("#transactionForm");
+      transactionForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        var inputs = document.querySelectorAll("#transaction td > input");
+        var transaction = [];
+        inputs.forEach(function(input){
+          transaction.push(input.value);
+        });
+        newInvoice(transaction);
+      })
     </script>
 
 </body>

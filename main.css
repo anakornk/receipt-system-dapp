@@ -1,0 +1,22 @@
+#transaction {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#transaction td, #transaction th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#transaction tr{background-color: #f2f2f2;}
+
+#transaction tr:hover {background-color: #ddd;}
+
+#transaction th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}
