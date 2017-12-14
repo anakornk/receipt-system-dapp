@@ -14,10 +14,16 @@ contract owned {
 }
 
 contract Business is owned {
-  Cashier[] public cashiers;
-  mapping (address => uint) public cashierId;
+  Cashier[] internal cashiers;
+  mapping (address => uint) internal cashierIndex;
+
   Receipt[] public receipts;
-  mapping (uint => Item) public items;
+
+
+  Item[] internal items;
+  mapping (uint => uint) internal itemIndex;
+
+
   Invoice[] public invoices;
 
   mapping (address => bool) public frozenCashier;
@@ -28,13 +34,13 @@ contract Business is owned {
   }
 
   struct Receipt {
-    uint cashierId;
+    uint cashierIndex;
     uint totalPaid;
     string buyerInfo;
   }
 
   struct Invoice {
-    uint cashierId;
+    uint cashierIndex;
     TransactionItem[] transactionItems;
     uint subTotal;
   }
@@ -53,26 +59,38 @@ contract Business is owned {
   }
 
   modifier onlyCashiers {
-    require(cashierId[msg.sender] != 0 && !frozenCashier[msg.sender]);
+    require(cashierIndex[msg.sender] != 0 && !frozenCashier[msg.sender]);
     _;
   }
 
   event InvoiceEvent(string text, uint invoiceId);
 
   function Business () public {
-    addCashier(0,"");
+    addCashier(0,"NULL");
     addCashier(msg.sender,"OWNER");
-    addItem(1,"Hot Dog",50);
-    addItem(2,"Red Bull",20);
+
+    addItem(0,"NULL",0);
+    addItem(100,"Hot Dog",50);
+    addItem(101,"Red Bull",20);
   }
   // add edit
   function addCashier(address cashierAddr, string cashierName) onlyOwner public {
-    uint id = cashierId[cashierAddr];
-    if (id == 0) {
-      cashierId[cashierAddr] = cashiers.length;
-      id = cashiers.length++;
+    uint index = cashierIndex[cashierAddr];
+    if (index == 0) {
+      cashierIndex[cashierAddr] = cashiers.length;
+      index = cashiers.length++;
     }
-    cashiers[id] = Cashier({addr: cashierAddr, name: cashierName});
+    cashiers[index] = Cashier({addr: cashierAddr, name: cashierName});
+  }
+
+  function getCashierByIndex(uint index) onlyOwner public constant returns (address addr, string name) {
+    Cashier storage cashier = cashiers[index];
+    return (cashier.addr, cashier.name);
+  }
+
+  function getCashierByAddress(address cashierAddr) onlyOwner public constant returns (address addr, string name) {
+    Cashier storage cashier = cashiers[cashierIndex[cashierAddr]];
+    return (cashier.addr, cashier.name);
   }
 
   // freeze cashier
@@ -84,7 +102,7 @@ contract Business is owned {
     uint id = receipts.length++;
     Receipt storage r = receipts[id];
     r.totalPaid = _totalPaid;
-    r.cashierId = cashierId[msg.sender];
+    r.cashierIndex = cashierIndex[msg.sender];
     r.buyerInfo = _buyerInfo;
     return id;
   }
@@ -93,10 +111,14 @@ contract Business is owned {
     require(transaction.length % 2 == 0);
     uint id = invoices.length++;
     Invoice storage invoice = invoices[id];
-    invoice.cashierId = cashierId[msg.sender];
+    invoice.cashierIndex = cashierIndex[msg.sender];
     invoice.subTotal = 0;
     for(uint256 i=0;i<transaction.length;i=i+2){
-        Item memory item = items[transaction[i]];
+        // check valid item here
+        require(itemIndex[transaction[i]] != 0);
+
+        Item memory item = items[itemIndex[transaction[i]]];
+
         uint _amount = item.price* transaction[i+1];
         invoice.transactionItems.push(TransactionItem({
             name: item.name,
@@ -117,19 +139,28 @@ contract Business is owned {
     uint[] memory _quantityArray = new uint[](len);
     uint[] memory _amountArray = new uint[](len);
     for(uint256 i=0;i<invoice.transactionItems.length;i++){
-        _nameArray[i] = invoice.transactionItems[i].name;
-         _unitPriceArray[i] = invoice.transactionItems[i].unitPrice;
-         _quantityArray[i] = invoice.transactionItems[i].quantity;
-        _amountArray[i] = invoice.transactionItems[i].amount;
+      _nameArray[i] = invoice.transactionItems[i].name;
+      _unitPriceArray[i] = invoice.transactionItems[i].unitPrice;
+      _quantityArray[i] = invoice.transactionItems[i].quantity;
+      _amountArray[i] = invoice.transactionItems[i].amount;
     }
     return (_nameArray,_unitPriceArray,_quantityArray,_amountArray);
-    //return (invoice.cashierId,,invoice.subTotal);
+    //return (invoice.cashierIndex,,invoice.subTotal);
   }
 
   function addItem(uint _id, bytes32 _name, uint _price) onlyOwner public{
-    items[_id] = Item({name: _name, price: _price});
+    uint index = itemIndex[_id];
+    if(index == 0) {
+      itemIndex[_id] = items.length;
+      index = items.length++;
+    }
+    items[index] = Item({name: _name, price: _price});
   }
 
+  function getItem(uint itemId) public constant returns (bytes32 name, uint price){
+    Item storage item = items[itemIndex[itemId]];
+    return (item.name, item.price);
+  }
 
 //item invoice
 }
