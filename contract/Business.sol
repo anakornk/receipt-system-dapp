@@ -14,6 +14,13 @@ contract owned {
 }
 
 contract Business is owned {
+
+  struct BusinessInfo {
+    bytes32 name;
+  }
+  BusinessInfo public businessInfo;
+
+
   Cashier[] internal cashiers;
   mapping (address => uint) internal cashierIndex;
 
@@ -26,7 +33,7 @@ contract Business is owned {
 
   Invoice[] public invoices;
 
-  mapping (address => bool) public frozenCashier;
+  mapping (address => bool) internal frozenCashier;
 
   struct Cashier {
     address addr;
@@ -43,6 +50,7 @@ contract Business is owned {
     uint cashierIndex;
     TransactionItem[] transactionItems;
     uint subTotal;
+    bytes32 buyerInfo;
   }
 
   struct Item {
@@ -65,13 +73,16 @@ contract Business is owned {
 
   event InvoiceEvent(string text, uint invoiceId);
 
-  function Business () public {
+  function Business (bytes32 _name) public {
+    businessInfo = BusinessInfo({name: _name});
+
     addCashier(0,"NULL");
     addCashier(msg.sender,"OWNER");
 
     addItem(0,"NULL",0);
     addItem(100,"Hot Dog",50);
     addItem(101,"Red Bull",20);
+
   }
   // add edit
   function addCashier(address cashierAddr, string cashierName) onlyOwner public {
@@ -107,11 +118,13 @@ contract Business is owned {
     return id;
   }
 
-  function newInvoice(uint[] transaction) onlyCashiers public{
+  // pay to who
+  function newInvoice(uint[] transaction, bytes32 _buyerInfo) onlyCashiers public{
     require(transaction.length % 2 == 0);
     uint id = invoices.length++;
     Invoice storage invoice = invoices[id];
     invoice.cashierIndex = cashierIndex[msg.sender];
+    invoice.buyerInfo = _buyerInfo;
     invoice.subTotal = 0;
     for(uint256 i=0;i<transaction.length;i=i+2){
         // check valid item here
@@ -131,7 +144,7 @@ contract Business is owned {
     InvoiceEvent("New Invoice", id);
   }
 
-  function getInvoice(uint invoiceId) public constant returns (bytes32[] nameArray,uint[] unitPriceArray,uint[] quantityArray,uint[] amountArray) {
+  function getInvoice(uint invoiceId) public constant returns (bytes32 businessName,bytes32[] nameArray,uint[] unitPriceArray,uint[] quantityArray,uint[] amountArray, uint subTotal, bytes32 buyerInfo) {
     Invoice storage invoice = invoices[invoiceId];
     uint len = invoice.transactionItems.length;
     bytes32[] memory _nameArray = new bytes32[](len);
@@ -144,7 +157,7 @@ contract Business is owned {
       _quantityArray[i] = invoice.transactionItems[i].quantity;
       _amountArray[i] = invoice.transactionItems[i].amount;
     }
-    return (_nameArray,_unitPriceArray,_quantityArray,_amountArray);
+    return (businessInfo.name,_nameArray,_unitPriceArray,_quantityArray,_amountArray, invoice.subTotal, invoice.buyerInfo);
     //return (invoice.cashierIndex,,invoice.subTotal);
   }
 
@@ -166,4 +179,6 @@ contract Business is owned {
 }
 
 // event
-
+// invoiceid to random
+// approve invoice/result with ether or other payment? use token?
+// government

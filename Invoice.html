@@ -21,6 +21,7 @@
 </head>
 <body>
     <div class="container">
+      BuyerName: <input type="text" id="buyerInfo">
       <form id="transactionForm" action="#">
         <table style="width:100%" id="transaction">
           <tr>
@@ -37,45 +38,25 @@
       </form>
     </div>
 
-
+    <script src="./business.js"></script>
     <script>
-       // Our future code here..
-      if (typeof web3 !== 'undefined') {
-        web3 = new Web3(web3.currentProvider);
-      } else {
-        // set the provider you want from Web3.providers
-        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-      }
 
-      web3.eth.defaultAccount = web3.eth.accounts[0];
-      console.log(web3.eth.accounts[0]);
-
-      var BusinessContract = web3.eth.contract([{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"receipts","outputs":[{"name":"cashierId","type":"uint256"},{"name":"totalPaid","type":"uint256"},{"name":"buyerInfo","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"cashierAddr","type":"address"},{"name":"freeze","type":"bool"}],"name":"freezeCashier","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_id","type":"uint256"},{"name":"_name","type":"bytes32"},{"name":"_price","type":"uint256"}],"name":"addItem","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"invoiceId","type":"uint256"}],"name":"getInvoice","outputs":[{"name":"nameArray","type":"bytes32[]"},{"name":"unitPriceArray","type":"uint256[]"},{"name":"quantityArray","type":"uint256[]"},{"name":"amountArray","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"invoices","outputs":[{"name":"cashierId","type":"uint256"},{"name":"subTotal","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"cashierId","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_totalPaid","type":"uint256"},{"name":"_buyerInfo","type":"string"}],"name":"newReceipt","outputs":[{"name":"receiptId","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"cashierAddr","type":"address"},{"name":"cashierName","type":"string"}],"name":"addCashier","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"items","outputs":[{"name":"name","type":"bytes32"},{"name":"price","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"cashiers","outputs":[{"name":"addr","type":"address"},{"name":"name","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"frozenCashier","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"transaction","type":"uint256[]"}],"name":"newInvoice","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"text","type":"string"},{"indexed":false,"name":"invoiceId","type":"uint256"}],"name":"InvoiceEvent","type":"event"}]);
-
-      var Business = BusinessContract.at('0x92b2a418bc58966c47f597b9db2c5f4c86d75329');
       console.log(Business.owner());
 
 
-      function newInvoice(transaction){
+      function newInvoice(transaction, buyerInfo){
         console.log(transaction);
-        var eGas = Business.newInvoice.estimateGas(transaction);
-        var transactionHash = Business.newInvoice(transaction,{gas: eGas});
+        var eGas = Business.newInvoice.estimateGas(transaction, buyerInfo);
+        var transactionHash = Business.newInvoice(transaction, buyerInfo, {gas: eGas});
         var invoiceEvent = Business.InvoiceEvent();
         invoiceEvent.watch(function(error,result){
           if(!error && transactionHash == result.transactionHash){
-            console.log(result.args.invoiceId.toString());
+            // console.log(result.args.invoiceId.toString());
+            document.location = './getInvoice.html#' + result.args.invoiceId.toString();
             invoiceEvent.stopWatching();
           }
         });
       };
-
-      function getInvoice(invoiceId){
-        var [nameArray,unitPriceArray,quantityArray,amountArray] =  Business.getInvoice(invoiceId);
-        for(var i=0;i<nameArray.length;i++){
-          var transationItem = web3.toAscii(nameArray[i]) + " " + unitPriceArray[i] + " " + quantityArray[i] + " " + amountArray[i];
-          console.log(transationItem);
-        }
-      }
 
       var addBtn = document.querySelector("#addBtn");
       addBtn.addEventListener('click',function(){
@@ -87,12 +68,18 @@
       var transactionForm = document.querySelector("#transactionForm");
       transactionForm.addEventListener('submit', function(e){
         e.preventDefault();
+        var buyerInfo = document.querySelector("#buyerInfo").value;
+        if(buyerInfo == "") {
+          alert("Please input buyer info");
+          return;
+        }
+
         var inputs = document.querySelectorAll("#transaction td > input");
         var transaction = [];
         inputs.forEach(function(input){
           transaction.push(input.value);
         });
-        newInvoice(transaction);
+        newInvoice(transaction, buyerInfo);
       })
 
 
