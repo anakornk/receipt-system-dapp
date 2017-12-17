@@ -6,6 +6,7 @@ if (typeof web3 !== 'undefined') {
 }
 
 web3.eth.defaultAccount = web3.eth.accounts[0];
+web3.eth.defaultAccount = '0xf4f20eea6eb9dbdd49d20de3f8c2b429cdb3542d';
 console.log(web3.eth.accounts[0]);
 
 var ReceiptSystemContract = web3.eth.contract([
@@ -338,4 +339,4 @@ var ReceiptSystemContract = web3.eth.contract([
   }
 ]);
 
-var ReceiptSystem = ReceiptSystemContract.at('0x8096ce373ef38f7b83a0b51acb18ec95c98f4db3');
+var ReceiptSystem = ReceiptSystemContract.at('0xe119691a5be952efb928c208f97d1908fbc59942');

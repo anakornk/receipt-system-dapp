@@ -17,11 +17,11 @@ contract ReceiptSystem is owned {
 
 
   Business[] public businesses;
-  mapping (address => uint) internal businessIndex;
-  mapping (address => bool) internal frozenBusiness;
+  mapping (address => uint) public businessIndex;
+  mapping (address => bool) public frozenBusiness;
 
   Customer[] public customers;
-  mapping (address => uint) internal customerIndex;
+  mapping (address => uint) public customerIndex;
 
   Invoice[] public invoices;
 

@@ -51,12 +51,14 @@
         console.log(encryptedData);
         console.log(encryptedByteArray);
         // create sharedKeyBC
+        var padding = "0x0000000000000000000000000000000000000000000000000000000000000000";
         var custPubKeyBuf = new Buffer(keySignC.slice(2)+publicKeyC.slice(2),'hex');
         var curvePoint2 = ecurve.Point.decodeFrom(ecparams,custPubKeyBuf);
         var sharedKeyBCPoint = curvePoint2.multiply(BigInteger.fromBuffer(busiPrivKey));
         var sharedKeyBCBuf = sharedKeyBCPoint.getEncoded(true);
         var keySignBC = "0x0" + sharedKeyBCBuf[0];
-        var sharedKeyBC = new web3.BigNumber(sharedKeyBCBuf.slice(1).toString('hex'),16);
+        var sharedKeyBC = sharedKeyBCBuf.slice(1).toString('hex');
+        sharedKeyBC = padding.slice(0,(32 - sharedKeyBC.length/2)+2) + sharedKeyBC;
 
         // submit
         var egas = ReceiptSystem.newInvoice.estimateGas(custAddr,encryptedByteArray,keySignBC,sharedKeyBC);

@@ -38,13 +38,16 @@
         var govPrivKeyBuf = new Buffer(document.querySelector("#govPrivKey").value, 'hex');
         var curvePoint = ecurve.Point.decodeFrom(ecparams,custPubKeyBuf);
         //compute shared key between Customer and Government
+        var padding = "0x0000000000000000000000000000000000000000000000000000000000000000";
         var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(govPrivKeyBuf));
         var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
         var keySignCG =  "0x0" + sharedKeyCGBuf[0];
-        var sharedKeyCG = new web3.BigNumber(sharedKeyCGBuf.slice(1).toString('hex'),16);
+        var sharedKeyCG = sharedKeyCGBuf.slice(1).toString('hex');
+        sharedKeyCG = padding.slice(0,(32 - sharedKeyCG.length/2)+2) + sharedKeyCG;
 
         var keySign = "0x0"+custPubKeyBuf[0];
-        var publicKey = new web3.BigNumber(custPubKeyBuf.slice(1).toString('hex'),16);
+        var publicKey = custPubKeyBuf.slice(1).toString('hex');
+        publicKey = padding.slice(0,(32 - publicKey.length/2)+2) + publicKey;
 
         // submit
         var egas = ReceiptSystem.addCustomer.estimateGas(custAddr,keySign,publicKey,keySignCG,sharedKeyCG);

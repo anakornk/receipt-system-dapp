@@ -12,8 +12,8 @@
           <input id="invoiceId" type="text">
         </label>
         <label>
-          Customer privateKey (hex: this will not be sent to the server)
-          <input id="custPrivKey" type="text" value="">
+          Government privateKey (hex: this will not be sent to the server)
+          <input id="govPrivKey" type="text" value="">
         </label>
         <button type="submit" class="btn btn-default">Submit</button>
       </form>
@@ -30,12 +30,12 @@
       document.querySelector("#invoiceForm").addEventListener('submit',function(e){
         e.preventDefault();
         var invoiceId = new web3.BigNumber(document.querySelector("#invoiceId").value,10);
-        var [keySignGB,sharedKeyGB,data] = ReceiptSystem.getInvoice(invoiceId);
-        var custPrivKey = new Buffer(document.querySelector("#custPrivKey").value, 'hex');
+        var [keySignBC,sharedKeyBC,data] = ReceiptSystem.getInvoice(invoiceId);
+        var govPrivKey = new Buffer(document.querySelector("#govPrivKey").value, 'hex');
         // get derivedKey
-        var sharedKeyGBBuf = new Buffer(keySignGB.slice(2)+sharedKeyGB.slice(2),'hex');
-        var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyGBBuf);
-        var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(custPrivKey));
+        var sharedKeyBCBuf = new Buffer(keySignBC.slice(2)+sharedKeyBC.slice(2),'hex');
+        var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyBCBuf);
+        var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(govPrivKey));
         var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
         var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
 
@@ -47,6 +47,8 @@
         console.log(decrypted);
 
       });
+
+
 
 
     </script>
