@@ -189,6 +189,25 @@ contract ReceiptSystem is owned {
     }
   }
 
+  function getRole() public constant returns (uint role){
+    // customer: 0
+    // business: 1
+    // government: 2
+    // other: 3
+    if(customerIndex[msg.sender] != 0){
+      // customer
+      return 0;
+    }else if(businessIndex[msg.sender] != 0){
+      // business
+      return 1;
+    }else if(msg.sender == owner){
+      // government
+      return 2;
+    }else {
+      return 3;
+    }
+  }
+
   // function getInvoice(uint invoiceId) public constant returns (bytes32 businessName,bytes32[] nameArray,uint[] unitPriceArray,uint[] quantityArray,uint[] amountArray, uint subTotal, bytes32 buyerInfo) {
   //   Invoice storage invoice = invoices[invoiceId];
   //   uint len = invoice.transactionItems.length;

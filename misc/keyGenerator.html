@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>Read Invoice</title>
+    <script src="../node_modules/web3/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+  </head>
+  <body>
+    <div>
+      <form action="#">
+        <button type="submit" class="btn btn-default">Generate New Key Pair</button>
+      </form>
+      <div id="randomKeyList"></div>
+    </div>
+    <script src="../bundle.js"></script>
+    <script src="../contract.js"></script>
+    <script>
+      var c = require('crypto');
+      var BigInteger = require('bigi');
+      var ecurve = require('ecurve');
+      var Buffer = require('buffer').Buffer;
+
+      var ecparams = ecurve.getCurveByName('secp256k1');
+      function generateKey(){
+        var privateKey = c.randomBytes(32);
+
+        var privateKeyHex = privateKey.toString('hex');
+        var publicKeyHex = ecparams.G.multiply(BigInteger.fromBuffer(privateKey)).getEncoded(true).toString('hex');
+        var randomKeyList = document.querySelector("#randomKeyList");
+        randomKeyList.innerHTML = "<p><b>Private Key(hex):</b>" + privateKeyHex + "</p><p><b>Public Key(hex):</b>" + publicKeyHex + "</p>";
+      }
+      document.querySelector("form").addEventListener('submit',function(e){
+        e.preventDefault();
+        generateKey();
+
+
+      });
+
+      generateKey();
+
+
+    </script>
+  </body>
+</html>
+

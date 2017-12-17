@@ -11,13 +11,75 @@ console.log(web3.eth.accounts[0]);
 
 var ReceiptSystemContract = web3.eth.contract([
   {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_addr",
+        "type": "address"
+      },
+      {
+        "name": "_keySign",
+        "type": "bytes1"
+      },
+      {
+        "name": "_publicKey",
+        "type": "bytes32"
+      },
+      {
+        "name": "_keySignGB",
+        "type": "bytes1"
+      },
+      {
+        "name": "_sharedKeyGB",
+        "type": "bytes32"
+      }
+    ],
+    "name": "addBusiness",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
+    "inputs": [
       {
         "name": "",
         "type": "address"
+      }
+    ],
+    "name": "frozenBusiness",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "invoiceId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getInvoice",
+    "outputs": [
+      {
+        "name": "keySign",
+        "type": "bytes1"
+      },
+      {
+        "name": "sharedKey",
+        "type": "bytes32"
+      },
+      {
+        "name": "data",
+        "type": "bytes1[]"
       }
     ],
     "payable": false,
@@ -93,29 +155,12 @@ var ReceiptSystemContract = web3.eth.contract([
   },
   {
     "constant": true,
-    "inputs": [
-      {
-        "name": "_customerAddr",
-        "type": "address"
-      }
-    ],
-    "name": "getSharedKeyCGData",
+    "inputs": [],
+    "name": "owner",
     "outputs": [
       {
-        "name": "keySignC",
-        "type": "bytes1"
-      },
-      {
-        "name": "publicKeyC",
-        "type": "bytes32"
-      },
-      {
-        "name": "keySignCG",
-        "type": "bytes1"
-      },
-      {
-        "name": "sharedKeyCG",
-        "type": "bytes32"
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -150,6 +195,37 @@ var ReceiptSystemContract = web3.eth.contract([
       },
       {
         "name": "sharedkeyGB",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_customerAddr",
+        "type": "address"
+      }
+    ],
+    "name": "getSharedKeyCGData",
+    "outputs": [
+      {
+        "name": "keySignC",
+        "type": "bytes1"
+      },
+      {
+        "name": "publicKeyC",
+        "type": "bytes32"
+      },
+      {
+        "name": "keySignCG",
+        "type": "bytes1"
+      },
+      {
+        "name": "sharedKeyCG",
         "type": "bytes32"
       }
     ],
@@ -196,23 +272,15 @@ var ReceiptSystemContract = web3.eth.contract([
     "constant": true,
     "inputs": [
       {
-        "name": "invoiceId",
-        "type": "uint256"
+        "name": "",
+        "type": "address"
       }
     ],
-    "name": "getInvoice",
+    "name": "businessIndex",
     "outputs": [
       {
-        "name": "keySign",
-        "type": "bytes1"
-      },
-      {
-        "name": "sharedKey",
-        "type": "bytes32"
-      },
-      {
-        "name": "data",
-        "type": "bytes1[]"
+        "name": "",
+        "type": "uint256"
       }
     ],
     "payable": false,
@@ -220,50 +288,48 @@ var ReceiptSystemContract = web3.eth.contract([
     "type": "function"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "text",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "name": "invoiceId",
-        "type": "uint256"
-      }
-    ],
-    "name": "InvoiceEvent",
-    "type": "event"
-  },
-  {
     "constant": false,
     "inputs": [
       {
-        "name": "_addr",
+        "name": "_customerAddr",
         "type": "address"
       },
       {
-        "name": "_keySign",
+        "name": "_data",
+        "type": "bytes1[]"
+      },
+      {
+        "name": "_keySignBC",
         "type": "bytes1"
       },
       {
-        "name": "_publicKey",
-        "type": "bytes32"
-      },
-      {
-        "name": "_keySignGB",
-        "type": "bytes1"
-      },
-      {
-        "name": "_sharedKeyGB",
+        "name": "_sharedKeyBC",
         "type": "bytes32"
       }
     ],
-    "name": "addBusiness",
+    "name": "newInvoice",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "customerIndex",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -297,29 +363,17 @@ var ReceiptSystemContract = web3.eth.contract([
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
+    "constant": true,
+    "inputs": [],
+    "name": "getRole",
+    "outputs": [
       {
-        "name": "_customerAddr",
-        "type": "address"
-      },
-      {
-        "name": "_data",
-        "type": "bytes1[]"
-      },
-      {
-        "name": "_keySignBC",
-        "type": "bytes1"
-      },
-      {
-        "name": "_sharedKeyBC",
-        "type": "bytes32"
+        "name": "role",
+        "type": "uint256"
       }
     ],
-    "name": "newInvoice",
-    "outputs": [],
     "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -336,7 +390,24 @@ var ReceiptSystemContract = web3.eth.contract([
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "name": "invoiceId",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvoiceEvent",
+    "type": "event"
   }
 ]);
 
-var ReceiptSystem = ReceiptSystemContract.at('0xe119691a5be952efb928c208f97d1908fbc59942');
+var ReceiptSystem = ReceiptSystemContract.at('0x1d2fc129a0f42df906303fa74989514e05d53e64');

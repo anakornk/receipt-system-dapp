@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>Add Customer</title>
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="./css/main.css">
+  </head>
+  <body>
+    <div>
+      <p id="status"></p>
+      <div id="featuresList">
+        <div class="featureCol">
+          <h2>Customer</h2>
+          <a href="./customer/readInvoice.html">Read Invoice</a>
+        </div>
+        <div class="featureCol">
+          <h2>Business</h2>
+          <a href="./business/newInvoice.html">New Invoice</a>
+          <a href="./business/readInvoice.html">Read Invoice</a>
+        </div>
+        <div class="featureCol">
+          <h2>Government</h2>
+          <a href="./government/addCustomer.html">Add Customer</a>
+          <a href="./government/addBusiness.html">Add Business</a>
+          <a href="./government/readInvoice.html">Read Invoice</a>
+        </div>
+      </div>
+      <div>
+        <h2>Misc</h2>
+        <a href="./misc/keyGenerator.html"> Generate Key Pair for Receipt Encryption</a>
+      </div>
+    </div>
+    <script src="./bundle.js"></script>
+    <script src="./contract.js"></script>
+    <script>
+    // customer: 0
+    // business: 1
+    // government: 2
+    // other: 3
+      var roleIndex = ReceiptSystem.getRole();
+      var role = ["Customer","Business","Government","OTHER"];
+      document.querySelector("#status").innerText = "Hello, " + role[roleIndex];
+    </script>
+  </body>
+</html>
