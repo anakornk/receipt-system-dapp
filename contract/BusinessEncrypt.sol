@@ -53,19 +53,6 @@ contract Business is owned {
     bytes32 buyerInfo;
   }
 
-  struct Item {
-    bytes32 name;
-    uint price;
-
-  }
-
-  struct TransactionItem {
-     bytes32 name;
-     uint unitPrice;
-     uint quantity;
-     uint amount;
-  }
-
   modifier onlyCashiers {
     require(cashierIndex[msg.sender] != 0 && !frozenCashier[msg.sender]);
     _;
@@ -109,15 +96,6 @@ contract Business is owned {
     frozenCashier[cashierAddr] = freeze;
   }
 
-  function newReceipt(uint _totalPaid, string _buyerInfo) onlyCashiers public returns (uint receiptId){
-    uint id = receipts.length++;
-    Receipt storage r = receipts[id];
-    r.totalPaid = _totalPaid;
-    r.cashierIndex = cashierIndex[msg.sender];
-    r.buyerInfo = _buyerInfo;
-    return id;
-  }
-
   // pay to who
   function newInvoice(uint[] transaction, bytes32 _buyerInfo) onlyCashiers public{
     require(transaction.length % 2 == 0);
@@ -126,21 +104,7 @@ contract Business is owned {
     invoice.cashierIndex = cashierIndex[msg.sender];
     invoice.buyerInfo = _buyerInfo;
     invoice.subTotal = 0;
-    for(uint256 i=0;i<transaction.length;i=i+2){
-        // check valid item here
-        require(itemIndex[transaction[i]] != 0);
 
-        Item memory item = items[itemIndex[transaction[i]]];
-
-        uint _amount = item.price* transaction[i+1];
-        invoice.transactionItems.push(TransactionItem({
-            name: item.name,
-            unitPrice:item.price,
-            quantity: transaction[i+1],
-            amount: _amount
-        }));
-        invoice.subTotal += _amount;
-    }
     InvoiceEvent("New Invoice", id);
   }
 
@@ -161,20 +125,6 @@ contract Business is owned {
     //return (invoice.cashierIndex,,invoice.subTotal);
   }
 
-  function addItem(uint _id, bytes32 _name, uint _price) onlyOwner public{
-    uint index = itemIndex[_id];
-    if(index == 0) {
-      itemIndex[_id] = items.length;
-      index = items.length++;
-    }
-    items[index] = Item({name: _name, price: _price});
-  }
-
-  function getItem(uint itemId) public constant returns (bytes32 name, uint price){
-    Item storage item = items[itemIndex[itemId]];
-    return (item.name, item.price);
-  }
-
 //item invoice
 }
 
@@ -182,3 +132,6 @@ contract Business is owned {
 // invoiceid to random
 // approve invoice/result with ether or other payment? use token?
 // government
+
+
+//can share secret key with other ppl without giving out privatekey

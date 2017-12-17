@@ -1,0 +1,90 @@
+<html>
+  <head>
+    <title>Read Invoice</title>
+    <script src="../node_modules/web3/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+  </head>
+  <body>
+    <div>
+      <form id="invoiceForm" action="#">
+        <label>
+          Invoice id:
+          <input id="invoiceId" type="text">
+        </label>
+        <label>
+          Customer privateKey (hex: this will not be sent to the server)
+          <input id="busiPrivKey" type="text" value="">
+        </label>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+    <script src="../bundle.js"></script>
+    <script src="../contract.js"></script>
+    <script>
+      var c = require('crypto');
+      var BigInteger = require('bigi');
+      var ecurve = require('ecurve');
+      var Buffer = require('buffer').Buffer;
+
+      var ecparams = ecurve.getCurveByName('secp256k1')
+      document.querySelector("#invoiceForm").addEventListener('submit',function(e){
+        e.preventDefault();
+        var invoiceId = new web3.BigNumber(document.querySelector("#invoiceId").value,10);
+        var [keySignCG,sharedKeyCG,data] = ReceiptSystem.getInvoice(invoiceId);
+        var busiPrivKey = new Buffer(document.querySelector("#busiPrivKey").value, 'hex');
+        // get derivedKey
+        var sharedKeyCGBuf = new Buffer(keySignCG.slice(2)+sharedKeyCG.slice(2),'hex');
+        var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyCGBuf);
+        var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(busiPrivKey));
+        var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
+        var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
+
+
+        var encryptedData = data.join("").replace(/0x/g,'');
+        const decipher = c.createDecipher('aes-256-cbc', derivedKey);
+        let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        console.log(decrypted);
+        // var busiAddr = new web3.BigNumber(document.querySelector("#busiAddr").value,16);
+        // var busiPubKeyBuf = new Buffer(document.querySelector("#busiPubKey").value, 'hex');
+        // var govPrivKeyBuf = new Buffer(document.querySelector("#govPrivKey").value, 'hex');
+        // var curvePoint = ecurve.Point.decodeFrom(ecparams,busiPubKeyBuf);
+        // //compute shared key between Business and Government
+        // var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(govPrivKeyBuf));
+        // var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
+        // var keySignCG =  "0x0" + sharedKeyCGBuf[0];
+        // var sharedKeyCG = new web3.BigNumber(sharedKeyCGBuf.slice(1).toString('hex'),16);
+
+        // var keySign = "0x0"+busiPubKeyBuf[0];
+        // var publicKey = new web3.BigNumber(busiPubKeyBuf.slice(1).toString('hex'),16);
+
+        // // submit
+        // var egas = ReceiptSystem.addBusiness.estimateGas(busiAddr,keySign,publicKey,keySignCG,sharedKeyCG);
+        // var transId = ReceiptSystem.addBusiness(busiAddr,keySign,publicKey,keySignCG,sharedKeyCG,{gas: egas});
+        // console.log(busiPubKeyBuf);
+        // console.log(sharedKeyCGBuf)
+        // console.log(transId);
+
+      });
+
+
+
+        // console.log(derivedKey);
+
+      // var custPrivKey = new Buffer('50fb19c91acef37c29b49a486b5919558586e346a1217b61503a39959edfebbd', 'hex');
+      // var sharedKeyGBBuf = new Buffer('0300eb0e96f831310d2b60b386532fb91f298014c5a552ad1669bc9332bd2e1ff8','hex');
+      // var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyGBBuf);
+      // var sharedKeyBCGPoint2 = curvePoint.multiply(BigInteger.fromBuffer(custPrivKey));
+      // console.log(sharedKeyBCGPoint2.equals(sharedKeyBCGPoint));
+
+      // var busiPrivKey = new Buffer('c044be2938cf69d0d4c80dce1a9d2e655587737ae08652eab1fcd2dce84bc699', 'hex');
+      // var sharedKeyCGBuf = new Buffer('0363eb2db5c845842bc2282e4a68e9975435b6bbecdd2b62c63d8abfef812d8566','hex');
+      // var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyCGBuf);
+      // var sharedKeyBCGPoint3 = curvePoint.multiply(BigInteger.fromBuffer(busiPrivKey));
+      // console.log(sharedKeyBCGPoint3.equals(sharedKeyBCGPoint));
+
+
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <title>Add Customer</title>
+    <script src="../node_modules/web3/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+  </head>
+  <body>
+    <div>
+      <form id="addCustomerForm" action="#">
+        <label>
+          Customer Address(0xABCD)
+          <input id="custAddr" type="text">
+        </label>
+        <label>
+          Customer publicKey(hex)
+          <input id="custPubKey" type="text" value="03631f21c94bd32be79081bacc301ca36d38e12a6e594bf2ff8a15743b4ecec81c">
+        </label>
+        <label>
+          Government privateKey (hex: this will not be sent to the server)
+          <input id="govPrivKey" type="text" value="a45b575d76ddf16de0888e84470fc813be7ed370a6699f1f5cfffc004abd5803">
+        </label>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+    <script src="../bundle.js"></script>
+    <script src="../contract.js"></script>
+    <script>
+      var crypto = require('crypto');
+      var BigInteger = require('bigi');
+      var ecurve = require('ecurve');
+      var Buffer = require('buffer').Buffer;
+
+      var ecparams = ecurve.getCurveByName('secp256k1')
+      document.querySelector("#addCustomerForm").addEventListener('submit',function(e){
+        e.preventDefault();
+        var custAddr = new web3.BigNumber(document.querySelector("#custAddr").value,16);
+        var custPubKeyBuf = new Buffer(document.querySelector("#custPubKey").value, 'hex');
+        var govPrivKeyBuf = new Buffer(document.querySelector("#govPrivKey").value, 'hex');
+        var curvePoint = ecurve.Point.decodeFrom(ecparams,custPubKeyBuf);
+        //compute shared key between Customer and Government
+        var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(govPrivKeyBuf));
+        var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
+        var keySignCG =  "0x0" + sharedKeyCGBuf[0];
+        var sharedKeyCG = new web3.BigNumber(sharedKeyCGBuf.slice(1).toString('hex'),16);
+
+        var keySign = "0x0"+custPubKeyBuf[0];
+        var publicKey = new web3.BigNumber(custPubKeyBuf.slice(1).toString('hex'),16);
+
+        // submit
+        var egas = ReceiptSystem.addCustomer.estimateGas(custAddr,keySign,publicKey,keySignCG,sharedKeyCG);
+        var transId = ReceiptSystem.addCustomer(custAddr,keySign,publicKey,keySignCG,sharedKeyCG,{gas: egas});
+        console.log(custPubKeyBuf);
+        console.log(sharedKeyCGBuf)
+        console.log(transId);
+
+      });
+    </script>
+  </body>
+</html>

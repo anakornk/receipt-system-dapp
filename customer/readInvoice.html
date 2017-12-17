@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>Read Invoice</title>
+    <script src="../node_modules/web3/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+  </head>
+  <body>
+    <div>
+      <form id="invoiceForm" action="#">
+        <label>
+          Invoice id:
+          <input id="invoiceId" type="text">
+        </label>
+        <label>
+          Customer privateKey (hex: this will not be sent to the server)
+          <input id="govPrivKey" type="text" value="">
+        </label>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+    <script src="../bundle.js"></script>
+    <script src="../contract.js"></script>
+    <script>
+      var crypto = require('crypto');
+      var BigInteger = require('bigi');
+      var ecurve = require('ecurve');
+      var Buffer = require('buffer').Buffer;
+
+      var ecparams = ecurve.getCurveByName('secp256k1')
+      document.querySelector("#invoiceForm").addEventListener('submit',function(e){
+        e.preventDefault();
+
+        // var busiAddr = new web3.BigNumber(document.querySelector("#busiAddr").value,16);
+        // var busiPubKeyBuf = new Buffer(document.querySelector("#busiPubKey").value, 'hex');
+        // var govPrivKeyBuf = new Buffer(document.querySelector("#govPrivKey").value, 'hex');
+        // var curvePoint = ecurve.Point.decodeFrom(ecparams,busiPubKeyBuf);
+        // //compute shared key between Business and Government
+        // var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(govPrivKeyBuf));
+        // var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
+        // var keySignCG =  "0x0" + sharedKeyCGBuf[0];
+        // var sharedKeyCG = new web3.BigNumber(sharedKeyCGBuf.slice(1).toString('hex'),16);
+
+        // var keySign = "0x0"+busiPubKeyBuf[0];
+        // var publicKey = new web3.BigNumber(busiPubKeyBuf.slice(1).toString('hex'),16);
+
+        // // submit
+        // var egas = ReceiptSystem.addBusiness.estimateGas(busiAddr,keySign,publicKey,keySignCG,sharedKeyCG);
+        // var transId = ReceiptSystem.addBusiness(busiAddr,keySign,publicKey,keySignCG,sharedKeyCG,{gas: egas});
+        // console.log(busiPubKeyBuf);
+        // console.log(sharedKeyCGBuf)
+        // console.log(transId);
+
+      });
+      var [keySignGB,sharedKeyGB,data] = ReceiptSystem.getInvoice(0);
+      console.log(keySignGB);
+      console.log(sharedKeyGB);
+      console.log(data);
+      var encryptedData = data.join("").replace(/0x/g,'');
+      console.log(encryptedData);
+      const decipher = crypto.createDecipher('aes-256-cbc', derivedKey);
+      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+      console.log(decrypted);
+    </script>
+  </body>
+</html>
+
