@@ -34,10 +34,11 @@
     <script>
     // customer: 0
     // business: 1
-    // government: 2
-    // other: 3
+    // business & customer: 2
+    // government: 3
+    // other: 4
       var roleIndex = ReceiptSystem.getRole();
-      var role = ["Customer","Business","Government","OTHER"];
+      var role = ["Customer","Business","Customer and Business","Government","OTHER"];
       document.querySelector("#status").innerText = "Hello, " + role[roleIndex];
     </script>
   </body>

@@ -13,10 +13,11 @@
         </label>
         <label>
           Government privateKey (hex: this will not be sent to the server)
-          <input id="govPrivKey" type="text" value="">
+          <input id="govPrivKey" type="text" value="ac143d7603c7bd9bd70dd5f69b9486542f95ca37a94aa7ce1941555e2c4be690">
         </label>
         <button type="submit" class="btn btn-default">Submit</button>
       </form>
+      <div id="invoice"></div>
     </div>
     <script src="../bundle.js"></script>
     <script src="../contract.js"></script>
@@ -45,6 +46,7 @@
         let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         console.log(decrypted);
+        document.querySelector("#invoice").innerText = decrypted;
 
       });
 

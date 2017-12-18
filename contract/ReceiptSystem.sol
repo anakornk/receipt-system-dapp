@@ -247,19 +247,25 @@ contract ReceiptSystem is owned {
   function getRole() public constant returns (uint role){
     // customer: 0
     // business: 1
-    // government: 2
-    // other: 3
-    if(customerIndex[msg.sender] != 0){
+    // business & customer: 2
+    // government: 3
+    // other: 4
+    uint custIndex = customerIndex[msg.sender];
+    uint busiIndex = businessIndex[msg.sender];
+    if(custIndex != 0 && busiIndex == 0){
       // customer
       return 0;
-    }else if(businessIndex[msg.sender] != 0){
+    }else if(busiIndex != 0 && custIndex == 0){
       // business
       return 1;
+    } else if(custIndex !=0 && busiIndex !=0){
+      // both
+      return 2;
     }else if(msg.sender == owner){
       // government
-      return 2;
-    }else {
       return 3;
+    }else {
+      return 4;
     }
   }
 

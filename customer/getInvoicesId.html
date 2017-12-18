@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>Read Invoice</title>
+    <script src="../node_modules/web3/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+  </head>
+  <body>
+    <div>
+      Invoices IDs
+      <div id="invoicesId"></div>
+    </div>
+    <script src="../bundle.js"></script>
+    <script src="../contract.js"></script>
+    <script>
+      // 1 - isCustomer
+      var invoicesId = ReceiptSystem.getInvoicesId(1);
+      var innerHTML = [];
+      invoicesId.forEach(function(invoiceId){
+        innerHTML.push("<p>"+ invoiceId.toString(10) +"</p>");
+      });
+      document.querySelector("#invoicesId").innerHTML = innerHTML;
+
+    </script>
+  </body>
+</html>
+
