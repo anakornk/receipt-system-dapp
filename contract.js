@@ -5,9 +5,10 @@ if (typeof web3 !== 'undefined') {
   web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 }
 
-web3.eth.defaultAccount = web3.eth.accounts[0];
-web3.eth.defaultAccount = '0xf4f20eea6eb9dbdd49d20de3f8c2b429cdb3542d';
-console.log(web3.eth.accounts[0]);
+web3.eth.defaultAccount = web3.eth.accounts[1];
+// web3.eth.defaultAccount = '0xf4f20eea6eb9dbdd49d20de3f8c2b429cdb3542d';
+web3.eth.defaultAccount = '0x318dab36b35a1960dfe664549a96a73526be8de9';
+console.log(web3.eth.accounts[1]);
 
 var ReceiptSystemContract = web3.eth.contract([
   {
@@ -88,6 +89,24 @@ var ReceiptSystemContract = web3.eth.contract([
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "getGovPubKey",
+    "outputs": [
+      {
+        "name": "keySign",
+        "type": "bytes1"
+      },
+      {
+        "name": "publicKey",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "name": "",
@@ -105,20 +124,12 @@ var ReceiptSystemContract = web3.eth.contract([
         "type": "bytes32"
       },
       {
-        "name": "keySignCG",
-        "type": "bytes1"
+        "name": "busiAddr",
+        "type": "address"
       },
       {
-        "name": "sharedKeyCG",
-        "type": "bytes32"
-      },
-      {
-        "name": "keySignGB",
-        "type": "bytes1"
-      },
-      {
-        "name": "sharedKeyGB",
-        "type": "bytes32"
+        "name": "custAddr",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -127,12 +138,17 @@ var ReceiptSystemContract = web3.eth.contract([
   },
   {
     "constant": true,
-    "inputs": [],
-    "name": "govPublicKey",
+    "inputs": [
+      {
+        "name": "isCustomer",
+        "type": "bool"
+      }
+    ],
+    "name": "getInvoicesId",
     "outputs": [
       {
-        "name": "",
-        "type": "bytes32"
+        "name": "invoiceId",
+        "type": "uint256[]"
       }
     ],
     "payable": false,
@@ -140,17 +156,29 @@ var ReceiptSystemContract = web3.eth.contract([
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "govKeySign",
-    "outputs": [
+    "constant": false,
+    "inputs": [
       {
-        "name": "",
+        "name": "_keySign",
         "type": "bytes1"
+      },
+      {
+        "name": "_publicKey",
+        "type": "bytes32"
+      },
+      {
+        "name": "_keySignGB",
+        "type": "bytes1"
+      },
+      {
+        "name": "_sharedKeyGB",
+        "type": "bytes32"
       }
     ],
+    "name": "registerBusiness",
+    "outputs": [],
     "payable": false,
-    "stateMutability": "view",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -194,7 +222,7 @@ var ReceiptSystemContract = web3.eth.contract([
         "type": "bytes1"
       },
       {
-        "name": "sharedkeyGB",
+        "name": "sharedKeyGB",
         "type": "bytes32"
       }
     ],
@@ -231,6 +259,24 @@ var ReceiptSystemContract = web3.eth.contract([
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "busiAddr",
+        "type": "address"
+      },
+      {
+        "name": "freeze",
+        "type": "bool"
+      }
+    ],
+    "name": "freezeBusiness",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -285,6 +331,32 @@ var ReceiptSystemContract = web3.eth.contract([
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_keySign",
+        "type": "bytes1"
+      },
+      {
+        "name": "_publicKey",
+        "type": "bytes32"
+      },
+      {
+        "name": "_keySignCG",
+        "type": "bytes1"
+      },
+      {
+        "name": "_sharedKeyCG",
+        "type": "bytes32"
+      }
+    ],
+    "name": "registerCustomer",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -410,4 +482,4 @@ var ReceiptSystemContract = web3.eth.contract([
   }
 ]);
 
-var ReceiptSystem = ReceiptSystemContract.at('0x1d2fc129a0f42df906303fa74989514e05d53e64');
+var ReceiptSystem = ReceiptSystemContract.at('0xdabcdaef3e7463988d8212cec13c2136960e87df');

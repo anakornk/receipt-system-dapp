@@ -107,10 +107,13 @@ contract ReceiptSystem is owned {
   // maybe a node running to approve?
   function addBusiness(address _addr, byte _keySign, bytes32 _publicKey, byte _keySignGB, bytes32 _sharedKeyGB) onlyOwner public {
     uint index = businessIndex[_addr];
-    if(index == 0){
-      businessIndex[_addr] = businesses.length;
-      index = businesses.length++;
-    }
+    // if(index == 0){
+    //   businessIndex[_addr] = businesses.length;
+    //   index = businesses.length++;
+    // }
+    require(index == 0);
+    businessIndex[_addr] = businesses.length;
+    index = businesses.length++;
     Business storage business = businesses[index];
     business.addr = _addr;
     business.keySign = _keySign;
@@ -135,10 +138,13 @@ contract ReceiptSystem is owned {
   // allows update
   function addCustomer(address _addr, byte _keySign, bytes32 _publicKey, byte _keySignCG, bytes32 _sharedKeyCG) onlyOwner public {
     uint index = customerIndex[_addr];
-    if(index == 0){
-      customerIndex[_addr] = customers.length;
-      index = customers.length++;
-    }
+    // if(index == 0){
+    //   customerIndex[_addr] = customers.length;
+    //   index = customers.length++;
+    // }
+    require(index == 0);
+    customerIndex[_addr] = customers.length;
+    index = customers.length++;
     Customer storage customer = customers[index];
     customer.addr = _addr;
     customer.keySign = _keySign;
@@ -228,6 +234,16 @@ contract ReceiptSystem is owned {
     }
   }
 
+  function getInvoicesId(bool isCustomer) public constant returns(uint[] invoiceId) {
+    if(isCustomer && customerIndex[msg.sender] != 0){
+      //is customer
+      return customers[customerIndex[msg.sender]].invoiceId;
+    }else if(businessIndex[msg.sender] != 0){
+      //is business
+      return businesses[businessIndex[msg.sender]].invoiceId;
+    }
+  }
+
   function getRole() public constant returns (uint role){
     // customer: 0
     // business: 1
@@ -270,3 +286,6 @@ contract ReceiptSystem is owned {
 // add another property to store status
 // g^bc
 // add hash to receipt
+
+
+// future work charge for receipt
