@@ -25,15 +25,15 @@ contract ReceiptSystem is owned {
 
   Invoice[] public invoices;
 
-  byte internal govKeySign;
-  bytes32 internal govPublicKey;
+  byte public govKeySign;
+  bytes32 public govPublicKey;
 
   struct Business {
     address addr;
     byte keySign;
     bytes32 publicKey;
     byte keySignGB;
-    bytes32 sharedKeyGB;
+    bytes32 sharedkeyGB;
     uint[] invoiceId;
   }
 
@@ -53,12 +53,10 @@ contract ReceiptSystem is owned {
 
     byte keySignBC;
     bytes32 sharedKeyBC;
-    // byte keySignCG;
-    // bytes32 sharedKeyCG;
-    // byte keySignGB;
-    // bytes32 sharedKeyGB;
-    address busiAddr;
-    address custAddr;
+    byte keySignCG;
+    bytes32 sharedKeyCG;
+    byte keySignGB;
+    bytes32 sharedKeyGB;
 
     byte[] data;
     // store public and private key
@@ -84,27 +82,15 @@ contract ReceiptSystem is owned {
 
   }
 
-  function getGovPubKey() public constant returns(byte keySign, bytes32 publicKey) {
-    return (govKeySign, govPublicKey);
-  }
-
   // can be payable in the future
-  function registerBusiness(byte _keySign, bytes32 _publicKey, byte _keySignGB, bytes32 _sharedKeyGB) public {
-    uint index = businessIndex[msg.sender];
-    require(index == 0); // allows new registration only, no update
-    businessIndex[msg.sender] = businesses.length;
-    index = businesses.length++;
-    Business storage business = businesses[index];
-    business.addr = msg.sender;
-    business.keySign = _keySign;
-    business.publicKey = _publicKey;
-    business.keySignGB = _keySignGB;
-    business.sharedKeyGB = _sharedKeyGB;
-    //
-  }
+  // function registerBusiness(byte _keySign, bytes32 _publicKey) public {
+  //   uint index = businessIndex[msg.sender];
+  //   require(index == 0); // allows new registration only, no update
+  //   businessIndex[msg.sender] = businesses.length;
+  //   index = businesses.length++;
+  //   businesses[index] = Business({addr: msg.sender, keySign: _keySign, publicKey: _publicKey});
+  // }
 
-  // because privatekey is locally stored must check
-  // maybe a node running to approve?
   function addBusiness(address _addr, byte _keySign, bytes32 _publicKey, byte _keySignGB, bytes32 _sharedKeyGB) onlyOwner public {
     uint index = businessIndex[_addr];
     if(index == 0){
@@ -116,21 +102,16 @@ contract ReceiptSystem is owned {
     business.keySign = _keySign;
     business.publicKey = _publicKey;
     business.keySignGB = _keySignGB;
-    business.sharedKeyGB = _sharedKeyGB;
+    business.sharedkeyGB = _sharedKeyGB;
   }
 
-  function registerCustomer(byte _keySign, bytes32 _publicKey, byte _keySignCG, bytes32 _sharedKeyCG) public {
-    uint index = customerIndex[msg.sender];
-    require(index == 0); // allows new registration only, no update
-    customerIndex[msg.sender] = customers.length;
-    index = customers.length++;
-    Customer storage customer = customers[index];
-    customer.addr = msg.sender;
-    customer.keySign = _keySign;
-    customer.publicKey = _publicKey;
-    customer.keySignCG = _keySignCG;
-    customer.sharedKeyCG = _sharedKeyCG;
-  }
+  // function registerCustomer(byte _keySign, bytes32 _publicKey) public {
+  //   uint index = customerIndex[msg.sender];
+  //   require(index == 0); // allows new registration only, no update
+  //   customerIndex[msg.sender] = customers.length;
+  //   index = customers.length++;
+  //   customers[index] = Customer({addr: msg.sender, keySign: _keySign, publicKey: _publicKey});
+  // }
 
   // allows update
   function addCustomer(address _addr, byte _keySign, bytes32 _publicKey, byte _keySignCG, bytes32 _sharedKeyCG) onlyOwner public {
@@ -159,10 +140,10 @@ contract ReceiptSystem is owned {
   //   return (cashier.addr, cashier.name);
   // }
 
-  // freeze business
-  function freezeBusiness(address busiAddr, bool freeze) onlyOwner public {
-    frozenBusiness[busiAddr] = freeze;
-  }
+  // // freeze cashier
+  // function freezeCashier(address cashierAddr, bool freeze) onlyOwner public {
+  //   frozenCashier[cashierAddr] = freeze;
+  // }
 
   // get sharedKey of customer and government
   function getSharedKeyCGData(address _customerAddr) onlyBusinesses public constant returns (byte keySignC, bytes32 publicKeyC,byte keySignCG, bytes32 sharedKeyCG){
@@ -173,28 +154,19 @@ contract ReceiptSystem is owned {
 
   // // pay to who
   function newInvoice(address _customerAddr,byte[] _data, byte _keySignBC, bytes32 _sharedKeyBC) onlyBusinesses public{
-    // business check already done in modifier
-    require(customerIndex[_customerAddr] != 0);
-
     uint id = invoices.length++;
     Invoice storage invoice = invoices[id];
-
     Business storage business = businesses[businessIndex[msg.sender]];
     Customer storage customer = customers[customerIndex[_customerAddr]];
 
-    // for government usage
     invoice.keySignBC = _keySignBC;
     invoice.sharedKeyBC = _sharedKeyBC;
-    // invoice.keySignCG = customer.keySignCG;
-    // invoice.sharedKeyCG = customer.sharedKeyCG;
-    // invoice.keySignGB = business.keySignGB;
-    // invoice.sharedKeyGB = business.sharedKeyGB;
-
-
-    invoice.busiAddr = msg.sender;
-    invoice.custAddr = _customerAddr;
-
+    invoice.keySignCG = customer.keySignCG;
+    invoice.sharedKeyCG = customer.sharedKeyCG;
+    invoice.keySignGB = business.keySignGB;
+    invoice.sharedKeyGB = business.sharedkeyGB;
     invoice.data = _data;
+
 
     business.invoiceId.push(id);
     customer.invoiceId.push(id);
@@ -205,26 +177,15 @@ contract ReceiptSystem is owned {
   function getInvoice(uint invoiceId) public constant returns(byte keySign, bytes32 sharedKey,byte[] data) {
     // additional check here?
     require(invoiceId >=0 && invoiceId < invoices.length);
-    address custAddr = invoices[invoiceId].custAddr;
-    address busiAddr = invoices[invoiceId].busiAddr;
-    uint index;
-
-    if(customerIndex[msg.sender] != 0 && custAddr == msg.sender){
+    if(customerIndex[msg.sender] != 0){
       // customer
-      index = businessIndex[busiAddr];
-
-      return (businesses[index].keySignGB,businesses[index].sharedKeyGB, invoices[invoiceId].data);
-
-    } else if(businessIndex[msg.sender] != 0 && busiAddr == msg.sender){
+      return (invoices[invoiceId].keySignGB,invoices[invoiceId].sharedKeyGB,invoices[invoiceId].data);
+    }else if(businessIndex[msg.sender] != 0){
       // business
-      index = customerIndex[custAddr];
-      return (customers[index].keySignCG,customers[index].sharedKeyCG,invoices[invoiceId].data);
-
-    } else if(msg.sender == owner){
+      return (invoices[invoiceId].keySignCG,invoices[invoiceId].sharedKeyCG,invoices[invoiceId].data);
+    }else if(msg.sender == owner){
       // government
       return (invoices[invoiceId].keySignBC,invoices[invoiceId].sharedKeyBC,invoices[invoiceId].data);
-    } else{
-      revert();
     }
   }
 
@@ -247,7 +208,24 @@ contract ReceiptSystem is owned {
     }
   }
 
+  // function getInvoice(uint invoiceId) public constant returns (bytes32 businessName,bytes32[] nameArray,uint[] unitPriceArray,uint[] quantityArray,uint[] amountArray, uint subTotal, bytes32 buyerInfo) {
+  //   Invoice storage invoice = invoices[invoiceId];
+  //   uint len = invoice.transactionItems.length;
+  //   bytes32[] memory _nameArray = new bytes32[](len);
+  //   uint[] memory _unitPriceArray = new uint[](len);
+  //   uint[] memory _quantityArray = new uint[](len);
+  //   uint[] memory _amountArray = new uint[](len);
+  //   for(uint256 i=0;i<invoice.transactionItems.length;i++){
+  //     _nameArray[i] = invoice.transactionItems[i].name;
+  //     _unitPriceArray[i] = invoice.transactionItems[i].unitPrice;
+  //     _quantityArray[i] = invoice.transactionItems[i].quantity;
+  //     _amountArray[i] = invoice.transactionItems[i].amount;
+  //   }
+  //   return (businessInfo.name,_nameArray,_unitPriceArray,_quantityArray,_amountArray, invoice.subTotal, invoice.buyerInfo);
+  //   //return (invoice.cashierIndex,,invoice.subTotal);
+  // }
 
+//item invoice
 }
 
 // event
@@ -257,16 +235,3 @@ contract ReceiptSystem is owned {
 
 
 //can share secret key with other ppl without giving out privatekey
-
-
-
-
-// cannot gengxin
-// not store receipt in receipt
-// customer request.
-// freeze business
-// because privatekey is lcoally stored must check
-// maybe a node running to approve?
-// add another property to store status
-// g^bc
-// add hash to receipt
