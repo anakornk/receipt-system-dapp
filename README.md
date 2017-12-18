@@ -18,8 +18,8 @@
 5. npm install
 6. To start TestRPC, type "testrpc" in terminal. (if DONE step 2)
 7. Run Lite Server: npm run dev
-8. Update config (view below)
-9. Deploy smart contract ('contract/ReceiptSystem.col') by using http://remix.ethereum.org/
+8. Deploy smart contract ('contract/ReceiptSystem.col') by using http://remix.ethereum.org/
+9. Update config (view below)
 10. Visit localhost site. (http://localhost:3000 - default port:3000)
 
 ## Config
