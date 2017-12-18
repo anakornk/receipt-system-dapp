@@ -27,27 +27,35 @@
       var ecurve = require('ecurve');
       var Buffer = require('buffer').Buffer;
 
-      var ecparams = ecurve.getCurveByName('secp256k1')
-      document.querySelector("#invoiceForm").addEventListener('submit',function(e){
-        e.preventDefault();
-        var invoiceId = new web3.BigNumber(document.querySelector("#invoiceId").value,10);
-        var [keySignGB,sharedKeyGB,data] = ReceiptSystem.getInvoice(invoiceId);
-        var custPrivKey = new Buffer(document.querySelector("#custPrivKey").value, 'hex');
-        // get derivedKey
-        var sharedKeyGBBuf = new Buffer(keySignGB.slice(2)+sharedKeyGB.slice(2),'hex');
-        var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyGBBuf);
-        var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(custPrivKey));
-        var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
-        var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
+      var ecparams = ecurve.getCurveByName('secp256k1');
+
+      function startApp(){
+        document.querySelector("#invoiceForm").addEventListener('submit',function(e){
+          e.preventDefault();
+          var invoiceId = new web3.BigNumber(document.querySelector("#invoiceId").value,10);
+          ReceiptSystem.getInvoice(invoiceId, function(error,result){
+            if(error) result;
+            var [keySignGB,sharedKeyGB,data] = result;
+            var custPrivKey = new Buffer(document.querySelector("#custPrivKey").value, 'hex');
+            // get derivedKey
+            var sharedKeyGBBuf = new Buffer(keySignGB.slice(2)+sharedKeyGB.slice(2),'hex');
+            var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyGBBuf);
+            var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(custPrivKey));
+            var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
+            var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
 
 
-        var encryptedData = data.join("").replace(/0x/g,'');
-        const decipher = c.createDecipher('aes-256-cbc', derivedKey);
-        let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        console.log(decrypted);
-        document.querySelector("#invoice").innerText = decrypted;
-      });
+            var encryptedData = data.join("").replace(/0x/g,'');
+            const decipher = c.createDecipher('aes-256-cbc', derivedKey);
+            let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            console.log(decrypted);
+            document.querySelector("#invoice").innerText = decrypted;
+          });
+
+        });
+      }
+
 
 
     </script>

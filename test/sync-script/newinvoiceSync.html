@@ -1,0 +1,146 @@
+<html>
+  <head>
+    <title>New Invoice</title>
+    <script src="../node_modules/web3/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="../css/main.css">
+  </head>
+  <body>
+    <div>
+      <form id="addCustomerForm" action="#">
+        <label>
+          Customer Address(0xABCD)
+          <input id="custAddr" type="text" value="">
+        </label>
+        <label>
+          Business privateKey (hex: this will not be sent to the server)
+          <input id="busiPrivKey" type="text" value="c044be2938cf69d0d4c80dce1a9d2e655587737ae08652eab1fcd2dce84bc699">
+        </label>
+        <b>Transaction details: </b><br>
+        <label>
+          Business Name:
+          <input id="businessName" type="text" value="">
+        </label>
+        <label>
+          CashierId:
+          <input id="cashierId" type="number" value="">
+        </label>
+        <table style="width:100%" id="items">
+          <tr>
+            <th>Name</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+          </tr>
+          <tr>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+          </tr>
+        </table>
+        <input type="button" value="ADD" id="addBtn">
+        <br>
+        <label>
+          Customer Name
+          <input id="customerName" type="text" value="">
+        </label>
+        <label>
+          <select id="paymentMethod">
+            <option>Wire Transfer</option>
+            <option>Cash</option>
+            <option>Cheque</option>
+            <option>Alipay</option>
+          </select>
+        </label>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+    </div>
+    <script src="../bundle.js"></script>
+    <script src="../contract.js"></script>
+    <script>
+      var BigInteger = require('bigi');
+      var ecurve = require('ecurve');
+      var Buffer = require('buffer').Buffer;
+      var ecparams = ecurve.getCurveByName('secp256k1')
+      var c = require('crypto');
+
+
+      var addBtn = document.querySelector("#addBtn");
+      addBtn.addEventListener('click',function(){
+        var td = document.createElement('tr');
+        td.innerHTML = '<td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>';
+        document.querySelector("#items").appendChild(td);
+      });
+
+      document.querySelector("#addCustomerForm").addEventListener('submit',function(e){
+        e.preventDefault();
+        // grab data
+        var custAddr = new web3.BigNumber(document.querySelector("#custAddr").value,16);
+        var busiPrivKey = new Buffer(document.querySelector("#busiPrivKey").value, 'hex');
+        var [keySignC,publicKeyC,keySignCG, sharedKeyCG] = ReceiptSystem.getSharedKeyCGData(custAddr);
+        // console.log(keySignCG);
+        // console.log(sharedKeyCG);
+
+        //create transaction data
+        var inputs = document.querySelectorAll("#items td > input");
+        var transaction = {};
+        var items = [];
+        var subTotal = 0;
+        for(var i=0;i<inputs.length;i=i+3){
+          const amount = inputs[i+1].value*inputs[i+2].value;
+          items.push({
+            name: inputs[i].value,
+            unitPrice: inputs[i+1].value,
+            quantity: inputs[i+2].value,
+            amount: amount,
+          });
+          subTotal += amount;
+        }
+        transaction.subTotal = subTotal;
+        var paymentMethod = document.querySelector("#paymentMethod");
+        var customer = {
+          name: document.querySelector("#customerName").value,
+          paymentMethod: paymentMethod.options[paymentMethod.selectedIndex].text,
+        };
+        var business = {
+          name: document.querySelector("#businessName").value,
+          cashierId: document.querySelector("#cashierId").value,
+        };
+        transaction.items = items;
+        transaction.business = business;
+        transaction.customer = customer;
+        var transactionJSON = JSON.stringify(transaction);
+        transactionJSON = "testData";
+        // encrypt transaction data
+        var sharedKeyCGBuf = new Buffer(keySignCG.slice(2)+sharedKeyCG.slice(2),'hex');
+        var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyCGBuf);
+        var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(busiPrivKey));
+        var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
+        var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
+        var cipher = c.createCipher('aes-256-cbc',derivedKey);
+        var encryptedData = cipher.update(transactionJSON, 'utf8','hex');
+        encryptedData += cipher.final('hex'); //append block leftovers
+        var encryptedByteArray = [];
+        for(var i=0;i<encryptedData.length;i=i+2){
+          encryptedByteArray.push("0x" + encryptedData[i] + encryptedData[i+1]);
+        }
+        console.log(encryptedData);
+        console.log(encryptedByteArray);
+
+        // create sharedKeyBC
+        var padding = "0x0000000000000000000000000000000000000000000000000000000000000000";
+        var custPubKeyBuf = new Buffer(keySignC.slice(2)+publicKeyC.slice(2),'hex');
+        var curvePoint2 = ecurve.Point.decodeFrom(ecparams,custPubKeyBuf);
+        var sharedKeyBCPoint = curvePoint2.multiply(BigInteger.fromBuffer(busiPrivKey));
+        var sharedKeyBCBuf = sharedKeyBCPoint.getEncoded(true);
+        var keySignBC = "0x0" + sharedKeyBCBuf[0];
+        var sharedKeyBC = sharedKeyBCBuf.slice(1).toString('hex');
+        sharedKeyBC = padding.slice(0,(32 - sharedKeyBC.length/2)+2) + sharedKeyBC;
+
+        // submit
+        var egas = ReceiptSystem.newInvoice.estimateGas(custAddr,encryptedByteArray,keySignBC,sharedKeyBC);
+        var transId = ReceiptSystem.newInvoice(custAddr,encryptedByteArray,keySignBC,sharedKeyBC,{gas: egas});
+        console.log(transId);
+
+      });
+    </script>
+  </body>
+</html>

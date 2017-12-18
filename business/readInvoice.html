@@ -28,48 +28,36 @@
       var Buffer = require('buffer').Buffer;
 
       var ecparams = ecurve.getCurveByName('secp256k1')
-      document.querySelector("#invoiceForm").addEventListener('submit',function(e){
-        e.preventDefault();
-        var invoiceId = new web3.BigNumber(document.querySelector("#invoiceId").value,10);
-        var [keySignCG,sharedKeyCG,data] = ReceiptSystem.getInvoice(invoiceId);
-        var busiPrivKey = new Buffer(document.querySelector("#busiPrivKey").value, 'hex');
-        // get derivedKey
-        var sharedKeyCGBuf = new Buffer(keySignCG.slice(2)+sharedKeyCG.slice(2),'hex');
-        var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyCGBuf);
-        var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(busiPrivKey));
-        var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
-        var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
+
+      function startApp(){
+        document.querySelector("#invoiceForm").addEventListener('submit',function(e){
+          e.preventDefault();
+          var invoiceId = new web3.BigNumber(document.querySelector("#invoiceId").value,10);
+          var keySignCG,sharedKeyCG,data;
+          ReceiptSystem.getInvoice(invoiceId,function(error,result){
+            if(error) return;
+            [keySignCG,sharedKeyCG,data] = result;
+            var busiPrivKey = new Buffer(document.querySelector("#busiPrivKey").value, 'hex');
+            // get derivedKey
+            var sharedKeyCGBuf = new Buffer(keySignCG.slice(2)+sharedKeyCG.slice(2),'hex');
+            var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyCGBuf);
+            var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(busiPrivKey));
+            var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
+            var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
 
 
-        var encryptedData = data.join("").replace(/0x/g,'');
-        const decipher = c.createDecipher('aes-256-cbc', derivedKey);
-        let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        console.log(decrypted);
+            var encryptedData = data.join("").replace(/0x/g,'');
+            const decipher = c.createDecipher('aes-256-cbc', derivedKey);
+            let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            console.log(decrypted);
 
-        document.querySelector("#invoice").innerText = decrypted;
+            document.querySelector("#invoice").innerText = decrypted;
+          });
 
-        // var busiAddr = new web3.BigNumber(document.querySelector("#busiAddr").value,16);
-        // var busiPubKeyBuf = new Buffer(document.querySelector("#busiPubKey").value, 'hex');
-        // var govPrivKeyBuf = new Buffer(document.querySelector("#govPrivKey").value, 'hex');
-        // var curvePoint = ecurve.Point.decodeFrom(ecparams,busiPubKeyBuf);
-        // //compute shared key between Business and Government
-        // var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(govPrivKeyBuf));
-        // var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
-        // var keySignCG =  "0x0" + sharedKeyCGBuf[0];
-        // var sharedKeyCG = new web3.BigNumber(sharedKeyCGBuf.slice(1).toString('hex'),16);
+        });
+      }
 
-        // var keySign = "0x0"+busiPubKeyBuf[0];
-        // var publicKey = new web3.BigNumber(busiPubKeyBuf.slice(1).toString('hex'),16);
-
-        // // submit
-        // var egas = ReceiptSystem.addBusiness.estimateGas(busiAddr,keySign,publicKey,keySignCG,sharedKeyCG);
-        // var transId = ReceiptSystem.addBusiness(busiAddr,keySign,publicKey,keySignCG,sharedKeyCG,{gas: egas});
-        // console.log(busiPubKeyBuf);
-        // console.log(sharedKeyCGBuf)
-        // console.log(transId);
-
-      });
 
 
 

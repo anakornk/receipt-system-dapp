@@ -1,16 +1,17 @@
-if (typeof web3 !== 'undefined') {
-  web3 = new Web3(web3.currentProvider);
-} else {
-  // set the provider you want from Web3.providers
-  web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-}
-
-web3.eth.defaultAccount = web3.eth.accounts[2];
-// web3.eth.defaultAccount = '0xf4f20eea6eb9dbdd49d20de3f8c2b429cdb3542d';
-// web3.eth.defaultAccount = '0x318dab36b35a1960dfe664549a96a73526be8de9';
-console.log(web3.eth.accounts[1]);
-
-var ReceiptSystemContract = web3.eth.contract([
+window.addEventListener('load', function() {
+  var isInjected = false;
+  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+  if (typeof web3 !== 'undefined') {
+    // Use Mist/MetaMask's provider
+    isInjected = true;
+    window.web3 = new Web3(web3.currentProvider);
+  } else {
+    console.log('No web3? You should consider trying MetaMask!')
+    // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+    window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+  }
+  // Now you can start your app & access web3 freely:
+  window.ReceiptSystemContract = web3.eth.contract([
   {
     "constant": true,
     "inputs": [
@@ -480,6 +481,38 @@ var ReceiptSystemContract = web3.eth.contract([
     "stateMutability": "nonpayable",
     "type": "function"
   }
-]);
+  ]);
+  // 0x4404fd836412271a503157d29e06c7ae10075b25 - testrpc
+  // 0x13ee287f54a6aac4c0ebb5576879a860c04a0022 - rospen
+  window.ReceiptSystem = ReceiptSystemContract.at('0x13ee287f54a6aac4c0ebb5576879a860c04a0022');
 
-var ReceiptSystem = ReceiptSystemContract.at('0xe53555e7a2a6835fb6f0c7483cdb99238b81d210');
+
+  if(isInjected){
+    startApp();
+  } else {
+    //synchronous method:
+    //window.web3.eth.defaultAccount = web3.eth.accounts[3];
+
+    // change index here to choose account
+    var defaultAccountIndex = 3;
+    web3.eth.getAccounts(function(error,accounts){
+      if(error) return;
+      window.web3.eth.defaultAccount = accounts[defaultAccountIndex];
+      startApp();
+    });
+  }
+
+})
+
+// if (typeof web3 !== 'undefined') {
+//   web3 = new Web3(web3.currentProvider);
+// } else {
+//   // set the provider you want from Web3.providers
+//   web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+// }
+
+// web3.eth.defaultAccount = '0xf4f20eea6eb9dbdd49d20de3f8c2b429cdb3542d';
+// web3.eth.defaultAccount = '0x318dab36b35a1960dfe664549a96a73526be8de9';
+// console.log(web3.eth.accounts[1]);
+
+

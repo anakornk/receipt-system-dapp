@@ -12,13 +12,19 @@
     <script src="../bundle.js"></script>
     <script src="../contract.js"></script>
     <script>
-      // 1 - isCustomer
-      var invoicesId = ReceiptSystem.getInvoicesId(1);
-      var innerHTML = [];
-      invoicesId.forEach(function(invoiceId){
-        innerHTML.push("<p>"+ invoiceId.toString(10) +"</p>");
-      });
-      document.querySelector("#invoicesId").innerHTML = innerHTML;
+      function startApp(){
+        // 1 - isCustomer
+        ReceiptSystem.getInvoicesId(1,function(error,invoicesId){
+          if(error) return;
+          console.log(invoicesId);
+          var innerHTML = "";
+          invoicesId.forEach(function(invoiceId){
+            innerHTML += ("<p>"+ invoiceId.toString(10) +"</p>");
+          });
+          document.querySelector("#invoicesId").innerHTML = innerHTML;
+        });
+      }
+
 
     </script>
   </body>

@@ -31,32 +31,41 @@
       var Buffer = require('buffer').Buffer;
 
       var ecparams = ecurve.getCurveByName('secp256k1')
-      document.querySelector("#addCustomerForm").addEventListener('submit',function(e){
-        e.preventDefault();
-        var custAddr = new web3.BigNumber(document.querySelector("#custAddr").value,16);
-        var custPubKeyBuf = new Buffer(document.querySelector("#custPubKey").value, 'hex');
-        var govPrivKeyBuf = new Buffer(document.querySelector("#govPrivKey").value, 'hex');
-        var curvePoint = ecurve.Point.decodeFrom(ecparams,custPubKeyBuf);
-        //compute shared key between Customer and Government
-        var padding = "0x0000000000000000000000000000000000000000000000000000000000000000";
-        var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(govPrivKeyBuf));
-        var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
-        var keySignCG =  "0x0" + sharedKeyCGBuf[0];
-        var sharedKeyCG = sharedKeyCGBuf.slice(1).toString('hex');
-        sharedKeyCG = padding.slice(0,(32 - sharedKeyCG.length/2)+2) + sharedKeyCG;
 
-        var keySign = "0x0"+custPubKeyBuf[0];
-        var publicKey = custPubKeyBuf.slice(1).toString('hex');
-        publicKey = padding.slice(0,(32 - publicKey.length/2)+2) + publicKey;
+      function startApp(){
+        document.querySelector("#addCustomerForm").addEventListener('submit',function(e){
+          e.preventDefault();
+          var custAddr = new web3.BigNumber(document.querySelector("#custAddr").value,16);
+          var custPubKeyBuf = new Buffer(document.querySelector("#custPubKey").value, 'hex');
+          var govPrivKeyBuf = new Buffer(document.querySelector("#govPrivKey").value, 'hex');
+          var curvePoint = ecurve.Point.decodeFrom(ecparams,custPubKeyBuf);
+          //compute shared key between Customer and Government
+          var padding = "0x0000000000000000000000000000000000000000000000000000000000000000";
+          var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(govPrivKeyBuf));
+          var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
+          var keySignCG =  "0x0" + sharedKeyCGBuf[0];
+          var sharedKeyCG = sharedKeyCGBuf.slice(1).toString('hex');
+          sharedKeyCG = padding.slice(0,(32 - sharedKeyCG.length/2)+2) + sharedKeyCG;
 
-        // submit
-        var egas = ReceiptSystem.addCustomer.estimateGas(custAddr,keySign,publicKey,keySignCG,sharedKeyCG);
-        var transId = ReceiptSystem.addCustomer(custAddr,keySign,publicKey,keySignCG,sharedKeyCG,{gas: egas});
-        console.log(custPubKeyBuf);
-        console.log(sharedKeyCGBuf)
-        console.log(transId);
+          var keySign = "0x0"+custPubKeyBuf[0];
+          var publicKey = custPubKeyBuf.slice(1).toString('hex');
+          publicKey = padding.slice(0,(32 - publicKey.length/2)+2) + publicKey;
 
-      });
+          // submit
+          ReceiptSystem.addCustomer.estimateGas(custAddr,keySign,publicKey,keySignCG,sharedKeyCG, function(error,egas){
+            if(error) return;
+            ReceiptSystem.addCustomer(custAddr,keySign,publicKey,keySignCG,sharedKeyCG,{gas: egas},function(error,transId){
+                if(error) return;
+                console.log(custPubKeyBuf);
+                console.log(sharedKeyCGBuf)
+                console.log(transId);
+            })
+          });
+
+
+        });
+      }
+
     </script>
   </body>
 </html>

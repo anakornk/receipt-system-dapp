@@ -23,40 +23,55 @@
       var Buffer = require('buffer').Buffer;
 
       var ecparams = ecurve.getCurveByName('secp256k1');
-      var [govKeySign, govPubKey]= ReceiptSystem.getGovPubKey();
-      var govPubKeyBuf = new Buffer(govKeySign.slice(2)+govPubKey.slice(2),'hex');
-      console.log(govPubKeyBuf.toString('hex'));
-      console.log('028844c5faede3f354d30a01579b3742bfc906565517d3b9f37077aaaef809ecf9');
-      document.querySelector("#registerForm").addEventListener('submit',function(e){
-        e.preventDefault();
-        //var custAddr = new web3.BigNumber(document.querySelector("#custAddr").value,16);
-        //var custPubKeyBuf = new Buffer(document.querySelector("#custPubKey").value, 'hex');
+      function startApp(){
+        ReceiptSystem.getGovPubKey(function(error,result){
+          if(error) return;
+          var [govKeySign,govPubKey] = result;
+          var govPubKeyBuf = new Buffer(govKeySign.slice(2)+govPubKey.slice(2),'hex');
+          // console.log(govPubKeyBuf.toString('hex'));
+          // console.log('028844c5faede3f354d30a01579b3742bfc906565517d3b9f37077aaaef809ecf9');
 
-        var custPrivKeyBuf = new Buffer(document.querySelector("#custPrivKey").value, 'hex');
-        var curvePoint = ecurve.Point.decodeFrom(ecparams,govPubKeyBuf);
+          document.querySelector("#registerForm").addEventListener('submit',function(e){
+            e.preventDefault();
+            //var custAddr = new web3.BigNumber(document.querySelector("#custAddr").value,16);
+            //var custPubKeyBuf = new Buffer(document.querySelector("#custPubKey").value, 'hex');
 
-        //compute shared key between Customer and Government
-        var padding = "0x0000000000000000000000000000000000000000000000000000000000000000";
-        var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(custPrivKeyBuf));
-        var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
-        var keySignCG =  "0x0" + sharedKeyCGBuf[0];
-        var sharedKeyCG = sharedKeyCGBuf.slice(1).toString('hex');
-        sharedKeyCG = padding.slice(0,(32 - sharedKeyCG.length/2)+2) + sharedKeyCG;
+            var custPrivKeyBuf = new Buffer(document.querySelector("#custPrivKey").value, 'hex');
+            var curvePoint = ecurve.Point.decodeFrom(ecparams,govPubKeyBuf);
 
-        // compute public key
-        var custPubKeyBuf = ecparams.G.multiply(BigInteger.fromBuffer(custPrivKeyBuf)).getEncoded(true);
-        var keySign = "0x0"+custPubKeyBuf[0];
-        var publicKey = custPubKeyBuf.slice(1).toString('hex');
-        publicKey = padding.slice(0,(32 - publicKey.length/2)+2) + publicKey;
+            //compute shared key between Customer and Government
+            var padding = "0x0000000000000000000000000000000000000000000000000000000000000000";
+            var sharedKeyCGPoint = curvePoint.multiply(BigInteger.fromBuffer(custPrivKeyBuf));
+            var sharedKeyCGBuf = sharedKeyCGPoint.getEncoded(true);
+            var keySignCG =  "0x0" + sharedKeyCGBuf[0];
+            var sharedKeyCG = sharedKeyCGBuf.slice(1).toString('hex');
+            sharedKeyCG = padding.slice(0,(32 - sharedKeyCG.length/2)+2) + sharedKeyCG;
 
-        // submit
-        var egas = ReceiptSystem.registerCustomer.estimateGas(keySign,publicKey,keySignCG,sharedKeyCG);
-        var transId = ReceiptSystem.registerCustomer(keySign,publicKey,keySignCG,sharedKeyCG,{gas: egas});
-        console.log(custPubKeyBuf);
-        console.log(sharedKeyCGBuf)
-        console.log(transId);
+            // compute public key
+            var custPubKeyBuf = ecparams.G.multiply(BigInteger.fromBuffer(custPrivKeyBuf)).getEncoded(true);
+            var keySign = "0x0"+custPubKeyBuf[0];
+            var publicKey = custPubKeyBuf.slice(1).toString('hex');
+            publicKey = padding.slice(0,(32 - publicKey.length/2)+2) + publicKey;
 
-      });
+            // submit
+            ReceiptSystem.registerCustomer.estimateGas(keySign,publicKey,keySignCG,sharedKeyCG,function(error,egas){
+              if(error) return;
+              ReceiptSystem.registerCustomer(keySign,publicKey,keySignCG,sharedKeyCG,{gas: egas},function(error,transId){
+                  if(error) return;
+                  console.log(custPubKeyBuf);
+                  console.log(sharedKeyCGBuf)
+                  console.log(transId);
+              });
+            });
+          });
+
+        });
+      }
+
+
+
+
+
     </script>
   </body>
 </html>
