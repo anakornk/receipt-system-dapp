@@ -484,7 +484,8 @@ window.addEventListener('load', function() {
   ]);
   // 0x4404fd836412271a503157d29e06c7ae10075b25 - testrpc
   // 0x13ee287f54a6aac4c0ebb5576879a860c04a0022 - rospen
-  window.ReceiptSystem = ReceiptSystemContract.at('0x13ee287f54a6aac4c0ebb5576879a860c04a0022');
+  var contractAddress = '0x13ee287f54a6aac4c0ebb5576879a860c04a0022';
+  window.ReceiptSystem = ReceiptSystemContract.at(contractAddress);
 
 
   if(isInjected){
