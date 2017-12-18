@@ -24,6 +24,7 @@
 
 ## Config
 1. Set contract address by updating 'contractAddress' variable in 'contract.js'
-2. In TestRPC environment, set 'defaultAccountIndex' in 'contract.js' to choose default account
-3. test/save.txt has pre-calculated pub/priv key pairs.
+2. Update ABI in 'contract.js'
+3. In TestRPC environment, set 'defaultAccountIndex' in 'contract.js' to choose default account
+4. test/save.txt has pre-calculated pub/priv key pairs.
 
