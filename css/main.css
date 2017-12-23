@@ -10,6 +10,15 @@ body {
   justify-content: center
 }
 
+input {
+  width:480px;
+}
+
+button {
+  width:60px;
+  background: url(../img/button.png)
+}
+
 .featureCol {
   width: 300px;
   display: flex;
@@ -19,6 +28,8 @@ body {
 form {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items:center;
   width: 800px;
 }
 #centerbox {

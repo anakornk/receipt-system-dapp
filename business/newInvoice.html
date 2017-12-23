@@ -5,24 +5,24 @@
     <link rel="stylesheet" href="../css/main.css">
   </head>
   <body>
-    <div>
+    <div id="centerbox">
       <form id="addCustomerForm" action="#">
         <label>
-          Customer Address(0xABCD)
+          Customer Address(0xABCD)<br>
           <input id="custAddr" type="text" value="">
         </label>
         <label>
-          Business privateKey (hex: this will not be sent to the server)
+          Business privateKey (hex: this will not be sent to the server)<br>
           <input id="busiPrivKey" type="text" value="c044be2938cf69d0d4c80dce1a9d2e655587737ae08652eab1fcd2dce84bc699">
         </label>
         <b>Transaction details: </b><br>
         <label>
           Business Name:
-          <input id="businessName" type="text" value="">
+          <input id="businessName" type="text" style="width:300px;" value="">
         </label>
         <label>
-          CashierId:
-          <input id="cashierId" type="number" value="">
+          Cashier Id:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <input id="cashierId" type="number" style="width:300px;" value="">
         </label>
         <table style="width:100%" id="items">
           <tr>
@@ -31,19 +31,19 @@
             <th>Quantity</th>
           </tr>
           <tr>
-            <td><input type="text"></td>
-            <td><input type="text"></td>
-            <td><input type="text"></td>
+            <td><input type="text" style="width:250px;"></td>
+            <td><input type="text" style="width:250px;"></td>
+            <td><input type="text" style="width:250px;"></td>
           </tr>
         </table>
-        <input type="button" value="ADD" id="addBtn">
+        <input type="button" value="ADD" id="addBtn" style="width:60px;">
         <br>
         <label>
-          Customer Name
-          <input id="customerName" type="text" value="">
+          Customer Name <br>
+          <input id="customerName" type="text" style="width:200px;" value="">
         </label>
         <label>
-          <select id="paymentMethod">
+          <select id="paymentMethod" style="width:200px;">
             <option>Wire Transfer</option>
             <option>Cash</option>
             <option>Cheque</option>
@@ -51,6 +51,7 @@
           </select>
         </label>
         <button type="submit" class="btn btn-default">Submit</button>
+        <br><br><a href="../business.html">Back to Business Page</a>
       </form>
     </div>
     <script src="../bundle.js"></script>

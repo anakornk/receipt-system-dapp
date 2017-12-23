@@ -5,21 +5,22 @@
     <link rel="stylesheet" href="../css/main.css">
   </head>
   <body>
-    <div>
+    <div id="centerbox">
       <form id="addBusinessForm" action="#">
         <label>
-          Business Address(0xABCD)
+          Business Address(0xABCD)<br>
           <input id="busiAddr" type="text">
         </label>
         <label>
-          Business publicKey(hex)
+          Business publicKey(hex)<br>
           <input id="busiPubKey" type="text" value="028c053f8d3ef6b8061d6f51894273d7d33b11c8c1a0b1a1956ad463f60578bd05">
         </label>
         <label>
-          Government privateKey (hex: this will not be sent to the server)
+          Government privateKey (hex: this will not be sent to the server)<br>
           <input id="govPrivKey" type="text" value="ac143d7603c7bd9bd70dd5f69b9486542f95ca37a94aa7ce1941555e2c4be690">
         </label>
         <button type="submit" class="btn btn-default">Submit</button>
+        <br><br><a href="../government.html">Back to Government Page</a>
       </form>
     </div>
     <script src="../bundle.js"></script>
