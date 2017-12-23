@@ -3,6 +3,7 @@ body {
 }
 
 #featuresList {
+  text-align: center;
   display:flex;
   flex-direction:row;
   align-items: flex-start;
@@ -20,3 +21,7 @@ form {
   flex-direction: column;
   width: 800px;
 }
+#centerbox {
+  text-align: center;
+}
+
