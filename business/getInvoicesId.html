@@ -19,6 +19,7 @@
         ReceiptSystem.getInvoicesId(0,function(error,invoicesId){
           if(error) return;
           console.log(invoicesId);
+          //document.getElementById('invoicesId').innerHTML=invoicesId;
           var innerHTML = "";
           invoicesId.forEach(function(invoiceId){
             console.log(invoiceId)
