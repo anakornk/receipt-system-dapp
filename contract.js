@@ -1,9 +1,9 @@
 window.addEventListener('load', function() {
-  var isInjected = false;
+  window.isInjected = false;
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
   if (typeof web3 !== 'undefined') {
     // Use Mist/MetaMask's provider
-    isInjected = true;
+    window.isInjected = true;
     window.web3 = new Web3(web3.currentProvider);
   } else {
     console.log('No web3? You should consider trying MetaMask!')
@@ -488,7 +488,7 @@ window.addEventListener('load', function() {
   window.ReceiptSystem = ReceiptSystemContract.at(contractAddress);
 
 
-  if(isInjected){
+  if(window.isInjected){
     startApp();
   } else {
     //synchronous method:
