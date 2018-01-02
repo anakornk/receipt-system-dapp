@@ -75,8 +75,18 @@
           e.preventDefault();
           var invoiceId = new web3.BigNumber(document.querySelector("#invoiceId").value,10);
           var keySignCG,sharedKeyCG,data;
-          ReceiptSystem.getInvoice(invoiceId,function(error,result){
-            if(error) return;
+
+          //fixed testrpc bug
+          var egas = {};
+          if(!window.isInjected){
+            egas.gas = 300000;
+          }
+
+          ReceiptSystem.getInvoice(invoiceId,egas,function(error,result){
+            if(error) {
+              document.querySelector("#invoice").innerText = "Error";
+              return;
+            }
             [keySignCG,sharedKeyCG,data] = result;
             var busiPrivKey = new Buffer(document.querySelector("#busiPrivKey").value, 'hex');
             // get derivedKey
