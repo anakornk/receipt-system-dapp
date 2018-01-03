@@ -5,8 +5,7 @@
 - Uses 3-Party Diffie–Hellman key exchange to get shared secret
 
 # TODO
-- Updating key consensus??? Race condition vuln?
-- Client-Side (JS) needs error-handling
+- Better error-handling
 - UI
 
 # USAGE
