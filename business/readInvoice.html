@@ -57,7 +57,7 @@
         $("#tb").append("<td width='5%'>"+element_bus.cashierId+"</td>");
         $("#tb").append("</tr>");
 
-        element_bus = JSON.parse(decrypted).business;
+        element_bus = JSON.parse(decrypted).customer;
         $("#hc").append("Customer");
         $("#tc").append("<tr> <td width='5%'>name</td> <td width='5%'>paymentMethod</td> </tr>")
         $("#tc").append("<tr>");
@@ -66,15 +66,14 @@
         $("#tc").append("</tr>");
       }
       //for test
-      var decrypted='{"subTotal":70,"items":[{"name":"Burger","unitPrice":"10","quantity":"5","amount":50},{"name":"Fries","unitPrice":"2","quantity":"10","amount":20}],"business":{"name":"Johny Moo","cashierId":"1"},"customer":{"name":"Tim","paymentMethod":"Wire Transfer"}}';
-      show_table(decrypted);
+      // var decrypted='{"subTotal":70,"items":[{"name":"Burger","unitPrice":"10","quantity":"5","amount":50},{"name":"Fries","unitPrice":"2","quantity":"10","amount":20}],"business":{"name":"Johny Moo","cashierId":"1"},"customer":{"name":"Tim","paymentMethod":"Wire Transfer"}}';
+      // show_table(decrypted);
 
 
       function startApp(){
         document.querySelector("#invoiceForm").addEventListener('submit',function(e){
           e.preventDefault();
           var invoiceId = new web3.BigNumber(document.querySelector("#invoiceId").value,10);
-          var keySignCG,sharedKeyCG,data;
 
           //fixed testrpc bug
           var egas = {};
@@ -87,23 +86,28 @@
               document.querySelector("#invoice").innerText = "Error";
               return;
             }
-            [keySignCG,sharedKeyCG,data] = result;
-            var busiPrivKey = new Buffer(document.querySelector("#busiPrivKey").value, 'hex');
-            // get derivedKey
-            var sharedKeyCGBuf = new Buffer(keySignCG.slice(2)+sharedKeyCG.slice(2),'hex');
-            var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyCGBuf);
-            var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(busiPrivKey));
-            var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
-            var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
+            try {
+              var [keySignCG,sharedKeyCG,data] = result;
+              var busiPrivKey = new Buffer(document.querySelector("#busiPrivKey").value, 'hex');
+              // get derivedKey
+              var sharedKeyCGBuf = new Buffer(keySignCG.slice(2)+sharedKeyCG.slice(2),'hex');
+              var curvePoint = ecurve.Point.decodeFrom(ecparams,sharedKeyCGBuf);
+              var sharedKeyBCGPoint = curvePoint.multiply(BigInteger.fromBuffer(busiPrivKey));
+              var sharedKeyBCG = sharedKeyBCGPoint.getEncoded(true);
+              var derivedKey = c.pbkdf2Sync(sharedKeyBCG, 'salt', 1, 256, 'sha512');
 
 
-            var encryptedData = data.join("").replace(/0x/g,'');
-            const decipher = c.createDecipher('aes-256-cbc', derivedKey);
-            let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-            decrypted += decipher.final('utf8');
-            console.log(decrypted);
+              var encryptedData = data.join("").replace(/0x/g,'');
+              const decipher = c.createDecipher('aes-256-cbc', derivedKey);
+              let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+              decrypted += decipher.final('utf8');
+              console.log(decrypted);
+              show_table(decrypted);
+              // document.querySelector("#invoice").innerText = decrypted;
+            }catch(err){
+              document.querySelector("#invoice").innerText = "Decrypt Error";
+            }
 
-            document.querySelector("#invoice").innerText = decrypted;
           });
 
         });

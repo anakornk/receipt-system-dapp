@@ -16,14 +16,14 @@ contract owned {
 contract ReceiptSystem is owned {
 
 
-  Business[] public businesses;
-  mapping (address => uint) public businessIndex;
-  mapping (address => bool) public frozenBusiness;
+  Business[] internal businesses;
+  mapping (address => uint) internal businessIndex;
+  mapping (address => bool) internal frozenBusiness;
 
-  Customer[] public customers;
-  mapping (address => uint) public customerIndex;
+  Customer[] internal customers;
+  mapping (address => uint) internal customerIndex;
 
-  Invoice[] public invoices;
+  Invoice[] internal invoices;
 
   byte internal govKeySign;
   bytes32 internal govPublicKey;
@@ -53,15 +53,10 @@ contract ReceiptSystem is owned {
 
     byte keySignBC;
     bytes32 sharedKeyBC;
-    // byte keySignCG;
-    // bytes32 sharedKeyCG;
-    // byte keySignGB;
-    // bytes32 sharedKeyGB;
     address busiAddr;
     address custAddr;
 
     byte[] data;
-    // store public and private key
   }
 
   modifier onlyBusinesses {
@@ -152,18 +147,6 @@ contract ReceiptSystem is owned {
     customer.keySignCG = _keySignCG;
     customer.sharedKeyCG = _sharedKeyCG;
   }
-
-
-
-  // function getCashierByIndex(uint index) onlyOwner public constant returns (address addr, string name) {
-  //   Cashier storage cashier = cashiers[index];
-  //   return (cashier.addr, cashier.name);
-  // }
-
-  // function getCashierByAddress(address cashierAddr) onlyOwner public constant returns (address addr, string name) {
-  //   Cashier storage cashier = cashiers[cashierIndex[cashierAddr]];
-  //   return (cashier.addr, cashier.name);
-  // }
 
   // freeze business
   function freezeBusiness(address busiAddr, bool freeze) onlyOwner public {
@@ -272,26 +255,4 @@ contract ReceiptSystem is owned {
 
 }
 
-// event
-// invoiceid to random
-// approve invoice/result with ether or other payment? use token?
-// government
 
-
-//can share secret key with other ppl without giving out privatekey
-
-
-
-
-// cannot gengxin
-// not store receipt in receipt
-// customer request.
-// freeze business
-// because privatekey is lcoally stored must check
-// maybe a node running to approve?
-// add another property to store status
-// g^bc
-// add hash to receipt
-
-
-// future work charge for receipt

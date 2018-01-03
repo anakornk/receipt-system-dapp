@@ -8,7 +8,7 @@
 
 
     <div id="centerbox">
-      <h1>Hello, Customer!</h1>
+      <h1 id="status"></h1>
       <a href="../index.html"><img src="./img/cc.png" alt="Change Character" height=50 width=70 ></img></a>
     </div>
 
@@ -32,5 +32,23 @@
     </div>
     <script src="./bundle.js"></script>
     <script src="./contract.js"></script>
+    <script>
+      function startApp(){
+        // customer: 0
+        // business: 1
+        // business & customer: 2
+        // government: 3
+        // other: 4
+        ReceiptSystem.getRole(function(error,roleIndex){
+          if(error) {
+            document.querySelector("#status").innerText = "Cannot get User Role, Are you sure you set up properly?";
+            return;
+          }
+          var role = ["Customer","Business","Customer and Business","Government","OTHER"];
+          document.querySelector("#status").innerText = "Hello, " + role[roleIndex];
+        });
+      }
+
+    </script>
   </body>
 </html>
